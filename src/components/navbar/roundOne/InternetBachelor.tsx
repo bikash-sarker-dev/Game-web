@@ -623,7 +623,9 @@ function WaitingScreen({ onNext }: { onNext: () => void }) {
         </div>
 
         {/* FIX: was using a plain <button> — replaced with Button component; onClick={onNext} correctly passed */}
-        <Button onClick={onNext}>Let&apos;s Go{dots}</Button>
+        <Button variant="game" onClick={onNext}>
+          Let&apos;s Go{dots}
+        </Button>
       </div>
 
       {/* Active contestants strip */}
@@ -681,7 +683,9 @@ function SpectatingScreen({ onReset }: { onReset: () => void }) {
         </div>
 
         {/* FIX: was using a plain <button> — replaced with Button component; onClick={onReset} correctly passed */}
-        <Button onClick={onReset}>← Back to lobby</Button>
+        <Button variant="game" onClick={onReset}>
+          ← Back to lobby
+        </Button>
       </div>
 
       {/* Active contestants strip */}
