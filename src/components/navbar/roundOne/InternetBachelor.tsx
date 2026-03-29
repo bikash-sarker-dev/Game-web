@@ -554,8 +554,8 @@ function LobbyScreen({ onStart }: { onStart: () => void }) {
       </div>
 
       {/* Participants panel */}
-      <div className="lg:w-72 rounded-2xl border border-white/10 bg-black/60 backdrop-blur-sm p-5">
-        <h3 className="text-white/40 uppercase tracking-[0.25em] text-xs font-bold mb-4">
+      <div className="lg:w-72 rounded-2xl border border-amber-500/30 bg-black/60 backdrop-blur-sm p-5">
+        <h3 className="text-white/40 uppercase tracking-[0.25em] text-base font-bold mb-4">
           Participants
         </h3>
         <ul className="space-y-2">
@@ -623,9 +623,7 @@ function WaitingScreen({ onNext }: { onNext: () => void }) {
         </div>
 
         {/* FIX: was using a plain <button> — replaced with Button component; onClick={onNext} correctly passed */}
-        <Button variant="game" onClick={onNext}>
-          Let&apos;s Go{dots}
-        </Button>
+        <Button onClick={onNext}>Let&apos;s Go{dots}</Button>
       </div>
 
       {/* Active contestants strip */}
@@ -683,9 +681,7 @@ function SpectatingScreen({ onReset }: { onReset: () => void }) {
         </div>
 
         {/* FIX: was using a plain <button> — replaced with Button component; onClick={onReset} correctly passed */}
-        <Button variant="ghost" onClick={onReset}>
-          ← Back to lobby
-        </Button>
+        <Button onClick={onReset}>← Back to lobby</Button>
       </div>
 
       {/* Active contestants strip */}
