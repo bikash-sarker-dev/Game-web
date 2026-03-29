@@ -740,7 +740,7 @@ export default function InternetBachelor() {
   return (
     <div className="">
       {/* Vignette */}
-      <div className="absolute inset-0 bg-radial-[ellipse_at_center] from-transparent via-transparent to-black/70 pointer-events-none" />
+      <div className=" bg-radial-[ellipse_at_center] from-transparent via-transparent to-black/70 pointer-events-none" />
 
       {/* ── Header ── */}
       <div className="text-center pt-18 relative">
