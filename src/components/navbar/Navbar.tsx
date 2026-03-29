@@ -52,6 +52,7 @@
 // export default Navbar;
 
 import React from "react";
+import Button from "../share/ButtonPrimary";
 
 const Navbar = () => {
   return (
@@ -80,9 +81,9 @@ const Navbar = () => {
         </div>
 
         {/* Right Settings Button */}
-        <button className="w-12 h-12 rounded-xl bg-red-700/70 hover:bg-red-600 flex items-center justify-center shadow-lg transition">
+        <Button variant="game">
           <svg
-            className="w-5 h-5 text-white"
+            className="w-6 h-6 text-white"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -92,7 +93,7 @@ const Navbar = () => {
               clipRule="evenodd"
             />
           </svg>
-        </button>
+        </Button>
       </div>
     </div>
   );
