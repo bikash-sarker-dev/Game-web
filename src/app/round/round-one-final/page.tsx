@@ -1,5 +1,11 @@
+import RounOneFinal from "@/components/navbar/roundOne/thniking/RoundOneFinal";
+
 const page = () => {
-  return <div>page</div>;
+  return (
+    <div>
+      <RounOneFinal />
+    </div>
+  );
 };
 
 export default page;

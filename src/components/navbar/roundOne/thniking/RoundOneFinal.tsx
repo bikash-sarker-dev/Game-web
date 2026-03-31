@@ -1,6 +1,9 @@
 "use client";
-import Button from "@/components/share/ButtonPrimary";
+
+import Image from "next/image";
 import { useEffect, useState } from "react";
+import coinImage from "@/assets/coin.png";
+import Button from "@/components/share/ButtonPrimary";
 
 interface Participant {
   id: number;
@@ -109,22 +112,33 @@ export default function RounOneFinal() {
         <div className="4">
           <div className="text-center w-full">
             {/* Main Title */}
-            <h1 className="text-red-500 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold leading-relaxed">
-              Unfortunately, your time here has come to an end...
-              <span className="ml-2">🌸</span>
+            <h1 className="text-white text-xl sm:text-2xl md:text-3xl  font-semibold leading-relaxed">
+              You survived! waiting for round 2..
             </h1>
 
-            {/* Subtitle */}
-            <p className="text-red-400 mt-4 text-sm sm:text-base md:text-lg font-medium">
-              You have been eliminated. Thank you
-            </p>
+            <div className="flex justify-center mt-5">
+              <Image
+                src={coinImage}
+                alt="Game Over"
+                // width={244}
+                // height={200}
+                // className="w-20 h-20"
+                priority
+              />
+            </div>
 
             {/* Description */}
-            <p className="text-gray-100 mt-6 text-xs sm:text-sm md:text-base leading-relaxed">
-              It was nice knowing you! Thank you for participating.
-              <br />
-              Better luck next time, my friend.
+            <p className="text-gray-100 mt-6 text-xs sm:text-sm  leading-relaxed">
+              You gained 100 pts
             </p>
+
+            <p className="text-gray-100 mt-6 text-xs sm:text-lg font-bold  leading-relaxed">
+              Round 1 Comeplete
+            </p>
+
+            <div className="flex justify-center mt-8">
+              <Button variant="game">ADVANCE to ROUND 2</Button>
+            </div>
           </div>
         </div>
       </div>
