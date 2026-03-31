@@ -51,10 +51,12 @@
 
 // export default Navbar;
 
-import React from "react";
+"use client";
 import Button from "../share/ButtonPrimary";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
+  const router = useRouter();
   return (
     <div
       className="w-full py-4"
@@ -65,7 +67,10 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
         {/* Left Profile Card */}
-        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl shadow-md">
+        <div
+          onClick={() => router.push("/")}
+          className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl shadow-md"
+        >
           {/* Avatar */}
           <img
             src="https://i.pravatar.cc/100"

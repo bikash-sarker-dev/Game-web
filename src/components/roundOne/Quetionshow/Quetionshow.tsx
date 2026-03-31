@@ -2,6 +2,7 @@
 
 import Button from "@/components/share/ButtonPrimary";
 import SideBar from "@/components/share/SideBar";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -354,6 +355,7 @@ function PlayerCard({
 export default function QuesationShow() {
   const [players, setPlayers] = useState<Player[]>(INITIAL_PLAYERS);
   const [timer, setTimer] = useState(120);
+  const router = useRouter();
 
   useEffect(() => {
     if (timer <= 0) return;
@@ -364,10 +366,12 @@ export default function QuesationShow() {
   const fmt = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
-  const handleEliminate = (id: number) =>
+  const handleEliminate = (id: number) => {
     setPlayers((prev) =>
       prev.map((p) => (p.id === id ? { ...p, eliminated: true } : p)),
     );
+    router.push("/round-one-final");
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center">

@@ -1,5 +1,6 @@
 "use client";
 import Button from "@/components/share/ButtonPrimary";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface Participant {
@@ -74,6 +75,7 @@ export default function DealBreaker() {
   const question = '"What is your deal-breaker?"';
   const [charIdx, setCharIdx] = useState(0);
   const [loading, setLoading] = useState(false); // ✅ NEW
+  const router = useRouter();
 
   useEffect(() => {
     if (charIdx < question.length) {
@@ -90,6 +92,7 @@ export default function DealBreaker() {
       // 👉 simulate API call (replace with real API)
       await new Promise((res) => setTimeout(res, 2000));
       console.log("Sent!");
+      router.push("/round/four");
     } catch (err) {
       console.error(err);
     } finally {
