@@ -14,7 +14,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyle =
-    "relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-150 active:translate-y-1";
+    "relative flex items-center justify-center gap-2 px-6 py-3  rounded-xl font-semibold transition-all duration-150 active:translate-y-1";
 
   const variants: Record<ButtonVariant, string> = {
     primary:
@@ -35,7 +35,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`${baseStyle} ${variants[variant]} ${className}`}
+      className={` cursor-pointer ${baseStyle} ${variants[variant]} ${className}`}
       style={gameStyle}
       {...props}
     >

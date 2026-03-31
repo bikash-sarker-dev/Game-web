@@ -5,6 +5,7 @@ import Image from "next/image";
 import RingImg from "@/assets/rings.png";
 import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Screen = "lobby" | "waiting" | "spectating";
@@ -244,6 +245,7 @@ function WaitingScreen({ onNext }: { onNext: () => void }) {
 function SpectatingScreen({ onReset }: { onReset: () => void }) {
   const question = '"CONNECTED TO LOBBY"';
   const [charIdx, setCharIdx] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     if (charIdx < question.length) {
@@ -275,12 +277,14 @@ function SpectatingScreen({ onReset }: { onReset: () => void }) {
           </p>
 
           <p className="text-[#52C41A] text-2xl font-extrabold uppercase mt-3 tracking-widest flex items-center">
-            I AM READY <Check />
+            I AM READY <Check size={36} />
           </p>
         </div>
 
         {/* FIX: was using a plain <button> — replaced with Button component; onClick={onReset} correctly passed */}
-        <Button variant="game">Write the question</Button>
+        <Button variant="game" onClick={() => router.push("/round/one")}>
+          Write the question
+        </Button>
       </div>
 
       {/* Active contestants strip */}
