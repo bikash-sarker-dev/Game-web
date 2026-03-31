@@ -1,4 +1,4 @@
-import DealBreaker from "@/components/navbar/roundOne/thniking/DealBreaker";
+import DealBreaker from "@/components/navbar/roundOne/dealBreaker/DealBreaker";
 
 const page = () => {
   return (
