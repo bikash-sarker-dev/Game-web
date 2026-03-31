@@ -338,7 +338,6 @@ function PlayerCard({
 export default function ThinkingProccess() {
   const [players, setPlayers] = useState<Player[]>(INITIAL_PLAYERS);
   const [timer, setTimer] = useState(120);
-  // const readyCount = PARTICIPANTS.filter((p) => p.status === "READY").length;
 
   useEffect(() => {
     if (timer <= 0) return;
