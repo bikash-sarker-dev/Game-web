@@ -370,7 +370,7 @@ export default function QuesationShow() {
     setPlayers((prev) =>
       prev.map((p) => (p.id === id ? { ...p, eliminated: true } : p)),
     );
-    router.push("/round-one-final");
+    router.push("/round/round-one-final");
   };
 
   return (
