@@ -128,7 +128,7 @@ function LobbyScreen({ onStart }: { onStart: () => void }) {
         </div>
 
         {/* FIX: onClick={onStart} — was incorrectly written as onClick={() => onStart} */}
-        <Button variant="game" onClick={onStart}>
+        <Button variant="game" onClick={() => onStart()}>
           ▶ START GAME
         </Button>
 

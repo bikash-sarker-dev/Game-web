@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/share/ButtonPrimary";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -89,15 +90,28 @@ export default function Questions() {
   const [question, setQuestion] = useState("");
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
+  const router = useRouter();
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!question.trim()) return;
+
     setSending(true);
-    setTimeout(() => {
+
+    try {
+      // 👉 simulate API call
+      await new Promise((res) => setTimeout(res, 1000));
+
       setSending(false);
       setSent(true);
-      setTimeout(() => setSent(false), 2500);
-    }, 900);
+
+      // 👉 show success message for 1.5s
+      setTimeout(() => {
+        router.push("/round/two");
+      }, 1500);
+    } catch (error) {
+      console.error(error);
+      setSending(false);
+    }
   };
 
   const readyCount = PARTICIPANTS.filter((p) => p.status === "READY").length;
@@ -106,7 +120,7 @@ export default function Questions() {
     /* ── Page shell ── */
     <div
       className="min-h-screen w-full flex flex-col items-center justify-start
-                 overflow-x-hidden"
+                 overflow-hidden"
       //   style={{
       //     backgroundImage: `
       //       radial-gradient(ellipse 80% 50% at 20% 30%, rgba(180,20,20,0.18) 0%, transparent 70%),
@@ -193,15 +207,14 @@ export default function Questions() {
 
           {/* Send button */}
           <div className="flex justify-center">
-            <Button variant="game" onClick={handleSend}>
-              {/* Shimmer */}
+            <Button
+              variant="game"
+              onClick={handleSend}
+              disabled={sending || !question.trim()}
+            >
               {sending ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg
-                    className="w-4 h-4 animate-spin"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24">
                     <circle
                       cx="12"
                       cy="12"

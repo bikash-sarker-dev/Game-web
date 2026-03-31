@@ -2,6 +2,7 @@
 
 import Button from "@/components/share/ButtonPrimary";
 import SideBar from "@/components/share/SideBar";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -186,9 +187,11 @@ function StatusBadge({ status }: { status: Participant["status"] }) {
 function PlayerCard({
   player,
   onEliminate,
+  loading,
 }: {
   player: Player;
   onEliminate: (id: number) => void;
+  loading: boolean;
 }) {
   const displayed = useTypingEffect(player.thinking ? "" : player.answer);
   const [imgErr, setImgErr] = useState(false);
@@ -321,8 +324,12 @@ function PlayerCard({
       {/* ── 4. Eliminate button ── */}
       {!player.eliminated && (
         <div className="px-4 pb-5 flex justify-center">
-          <Button variant="game" onClick={() => onEliminate(player.id)}>
-            ELIMINATE {player.shortName}
+          <Button
+            variant="game"
+            onClick={() => onEliminate(player.id)}
+            disabled={loading}
+          >
+            {loading ? "Eliminating..." : `ELIMINATE ${player.shortName}`}
           </Button>
         </div>
       )}
@@ -338,6 +345,20 @@ function PlayerCard({
 export default function ThinkingProccess() {
   const [players, setPlayers] = useState<Player[]>(INITIAL_PLAYERS);
   const [timer, setTimer] = useState(120);
+  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const router = useRouter();
+
+  const handleEliminate = (id: number) => {
+    setLoadingId(id); // start loading
+
+    setTimeout(() => {
+      setPlayers((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, eliminated: true } : p)),
+      );
+
+      router.push("/round/three"); // redirect after 2s
+    }, 2000);
+  };
 
   useEffect(() => {
     if (timer <= 0) return;
@@ -347,11 +368,6 @@ export default function ThinkingProccess() {
 
   const fmt = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
-
-  const handleEliminate = (id: number) =>
-    setPlayers((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, eliminated: true } : p)),
-    );
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center">
@@ -442,6 +458,7 @@ export default function ThinkingProccess() {
             key={player.id}
             player={player}
             onEliminate={handleEliminate}
+            loading={loadingId === player.id}
           />
         ))}
 
