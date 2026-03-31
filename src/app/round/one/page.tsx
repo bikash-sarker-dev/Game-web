@@ -1,4 +1,4 @@
-import Questions from "@/components/navbar/roundOne/Quesation";
+import Questions from "@/components/roundOne/Quesation";
 import React from "react";
 
 const page = () => {

@@ -4,6 +4,7 @@ import Button from "@/components/share/ButtonPrimary";
 import Image from "next/image";
 import RingImg from "@/assets/rings.png";
 import { useState, useEffect } from "react";
+import { Check } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Screen = "lobby" | "waiting" | "spectating";
@@ -241,7 +242,7 @@ function WaitingScreen({ onNext }: { onNext: () => void }) {
 
 // ─── Screen 3: Spectating Duel ────────────────────────────────────────────────
 function SpectatingScreen({ onReset }: { onReset: () => void }) {
-  const question = '"What is your deal-breaker?"';
+  const question = '"CONNECTED TO LOBBY"';
   const [charIdx, setCharIdx] = useState(0);
 
   useEffect(() => {
@@ -252,7 +253,7 @@ function SpectatingScreen({ onReset }: { onReset: () => void }) {
   }, [charIdx, question.length]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 flex flex-col gap-6">
+    <div className="w-full max-w-7xl mx-auto px-4 flex flex-col gap-6">
       <p className="text-white/40 uppercase tracking-[0.25em] text-xs font-semibold">
         Contestant 1
       </p>
@@ -260,7 +261,7 @@ function SpectatingScreen({ onReset }: { onReset: () => void }) {
       <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-black/90 to-rose-950/50 backdrop-blur-sm p-8 sm:p-14 flex flex-col items-center gap-8 min-h-[280px] justify-center">
         {/* Animated question */}
         <div className="text-center">
-          <p className="text-white font-bold text-lg sm:text-2xl italic leading-relaxed min-h-[2.5rem]">
+          <p className="text-white font-bold text-lg sm:text-2xl italic leading-relaxed min-h-[3.5rem]">
             {question.slice(0, charIdx)}
             {charIdx < question.length && (
               <span className="inline-block w-0.5 h-6 bg-amber-400 align-middle animate-pulse ml-0.5" />
@@ -269,16 +270,17 @@ function SpectatingScreen({ onReset }: { onReset: () => void }) {
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <SpinnerIcon />
-          <p className="text-white/35 text-sm uppercase tracking-widest">
-            Spectating the current duel…
+          <p className="text-white text-sm uppercase tracking-widest">
+            Waiting for the host to start the tournament
+          </p>
+
+          <p className="text-[#52C41A] text-2xl font-extrabold uppercase mt-3 tracking-widest flex items-center">
+            I AM READY <Check />
           </p>
         </div>
 
         {/* FIX: was using a plain <button> — replaced with Button component; onClick={onReset} correctly passed */}
-        <Button variant="game" onClick={onReset}>
-          ← Back to lobby
-        </Button>
+        <Button variant="game">Write the question</Button>
       </div>
 
       {/* Active contestants strip */}

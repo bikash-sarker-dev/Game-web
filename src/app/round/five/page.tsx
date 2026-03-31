@@ -1,4 +1,4 @@
-import TimeOut from "@/components/navbar/roundOne/timeOut/TimeOut";
+import TimeOut from "@/components/roundOne/timeOut/TimeOut";
 
 const page = () => {
   return (

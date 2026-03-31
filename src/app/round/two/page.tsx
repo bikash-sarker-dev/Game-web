@@ -1,4 +1,4 @@
-import ThinkingProccess from "@/components/navbar/roundOne/thniking/Thinking";
+import ThinkingProccess from "@/components/roundOne/thniking/Thinking";
 
 const page = () => {
   return (

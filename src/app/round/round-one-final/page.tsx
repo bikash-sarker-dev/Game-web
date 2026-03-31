@@ -1,4 +1,4 @@
-import RounOneFinal from "@/components/navbar/roundOne/thniking/RoundOneFinal";
+import RounOneFinal from "@/components/roundOne/thniking/RoundOneFinal";
 
 const page = () => {
   return (

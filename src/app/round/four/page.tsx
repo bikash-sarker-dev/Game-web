@@ -1,4 +1,4 @@
-import QuestionsShow from "@/components/navbar/roundOne/Quetionshow/Quetionshow";
+import QuestionsShow from "@/components/roundOne/Quetionshow/Quetionshow";
 import React from "react";
 
 const page = () => {

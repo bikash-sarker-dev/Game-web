@@ -1,4 +1,4 @@
-import InternetBachelor from "@/components/navbar/roundOne/InternetBachelor";
+import InternetBachelor from "@/components/roundOne/InternetBachelor";
 
 export default function Home() {
   return <InternetBachelor />;
