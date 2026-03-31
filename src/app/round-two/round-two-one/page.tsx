@@ -1,5 +1,11 @@
+import RoundTwoStart from "@/components/roundTwo/secondRoundStart/SecondRoundStart";
+
 const page = () => {
-  return <div>page</div>;
+  return (
+    <div>
+      <RoundTwoStart />
+    </div>
+  );
 };
 
 export default page;
