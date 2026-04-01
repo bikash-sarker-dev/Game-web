@@ -822,7 +822,7 @@ export default function EliminationGame() {
               </span>
               <div className="h-px w-8 sm:w-16 bg-gradient-to-l from-transparent to-red-600" />
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white uppercase">
+            <h1 className="text-3xl sm:text-4xl  font-black tracking-tight text-white uppercase">
               Round 2 –{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">
                 Pictures
