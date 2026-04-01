@@ -110,11 +110,11 @@ function PlayerCard({
       </div>
 
       {/* Photo */}
-      <div className="relative w-full aspect-[4/5] overflow-hidden">
+      <div className="relative w-full aspect-[4/4] overflow-hidden px-4">
         <img
           src={player.image}
           alt={player.label}
-          className="w-full h-full object-cover object-top transition-transform duration-700 hover:scale-105"
+          className="w-full  object-cover object-top transition-transform rounded-lg duration-700 hover:scale-105"
           style={{ backgroundColor: player.bgColor }}
         />
         {/* Red scan line effect on selected */}
@@ -209,7 +209,7 @@ export default function GrandFinale() {
   const readyCount = participants.filter((p) => p.status === "READY").length;
 
   return (
-    <div className="min-h-screen w-full max-w-7xl  mx-auto relative overflow-hidden font-sans ">
+    <div className=" w-full max-w-7xl  mx-auto relative overflow-hidden font-sans ">
       {/* ── Cinematic background ── */}
 
       {/* ── Top bar ── */}
@@ -226,7 +226,7 @@ export default function GrandFinale() {
       </div>
 
       {/* ── Page content ── */}
-      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+      <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         {/* ── Title ── */}
         <div className="text-center mb-8 lg:mb-12 space-y-2">
           <h1 className="text-3xl sm:text-4xl  font-black tracking-[0.15em] uppercase text-white drop-shadow-[0_0_30px_rgba(220,38,38,0.4)]">
@@ -248,7 +248,7 @@ export default function GrandFinale() {
           {/* ── Player cards + Neither ── */}
           <div className="lg:col-span-2 space-y-4">
             {/* Cards row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
               {players.map((player) => (
                 <PlayerCard
                   key={player.id}
