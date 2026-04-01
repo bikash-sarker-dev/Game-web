@@ -2,6 +2,7 @@
 
 import Button from "@/components/share/ButtonPrimary";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -93,6 +94,7 @@ function useTimer(initial = 24 * 3600 + 1 * 60 + 45) {
 // ─── Player card ──────────────────────────────────────────────────────────────
 function PlayerCard({ player }: { player: Player }) {
   const [muted, setMuted] = useState(player.muted);
+  const router = useRouter();
 
   return (
     <div className="relative rounded-2xl overflow-hidden border border-white/10 flex-1 min-w-[220px]">
@@ -169,7 +171,10 @@ function PlayerCard({ player }: { player: Player }) {
       {/* Crown winner badge */}
 
       <div className="flex justify-center my-4  px-3">
-        <Button variant="game">
+        <Button
+          variant="game"
+          onClick={() => router.push("/round-two/round-two-six")}
+        >
           <svg
             className="w-3.5 h-3.5 text-yellow-300"
             fill="currentColor"
@@ -226,6 +231,7 @@ export default function VideoGrand() {
   const [micOn, setMicOn] = useState(true);
   const [camOn, setCamOn] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
+  const router = useRouter();
 
   return (
     <>

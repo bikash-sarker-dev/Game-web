@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -240,6 +241,7 @@ function Confetti() {
 // ─── Player Card ──────────────────────────────────────────────────────────────
 function PlayerCard({ player, index }: { player: Player; index: number }) {
   const w = player.isWinner;
+  const router = useRouter();
 
   return (
     <div
@@ -363,6 +365,7 @@ function PlayerCard({ player, index }: { player: Player; index: number }) {
       <button
         className={w ? "gos-btn-crown" : undefined}
         disabled={!w}
+        onClick={() => router.push("/round-two/round-two-final")}
         style={{
           display: "block",
           width: "100%",
@@ -484,7 +487,6 @@ export default function GameOverScreen({
           />
           <CrownSVG />
         </div>
-
         {/* Title */}
         <h1
           style={{
@@ -504,7 +506,6 @@ export default function GameOverScreen({
         >
           Game Over
         </h1>
-
         {/* Winner */}
         <p
           style={{
@@ -521,7 +522,6 @@ export default function GameOverScreen({
         >
           ✦ &nbsp;Winner: {displayWinner}&nbsp; ✦
         </p>
-
         {/* Cards */}
         <div
           style={{
@@ -573,48 +573,9 @@ export default function GameOverScreen({
             <PlayerCard key={p.id} player={p} index={i} />
           ))}
         </div>
-
-        {/* Actions */}
-        {/* Actions */}
-        <div
-          className={`flex gap-3 mt-7 flex-wrap justify-center ${
-            ready ? "animate-[gos-fade-up_0.6s_ease_1.1s_both]" : ""
-          }`}
-        >
-          {/* Play Again */}
-          <button
-            onClick={onPlayAgain}
-            className="font-[Rajdhani] font-bold tracking-[0.18em] text-[12px] uppercase px-7 py-2.5 rounded-[10px] 
-               border border-white/10 bg-white/5 text-white/70 
-               hover:bg-white/10 hover:border-white/20 
-               transition-all duration-200 cursor-pointer"
-          >
-            ↺ &nbsp;Play Again
-          </button>
-
-          {/* View Stats */}
-          <button
-            className="font-[Rajdhani] font-bold tracking-[0.18em] text-[12px] uppercase px-7 py-2.5 rounded-[10px] 
-               border border-yellow-400/30 bg-yellow-400/10 text-yellow-300 
-               hover:bg-yellow-400/20 hover:shadow-[0_0_12px_rgba(255,185,0,0.4)] 
-               transition-all duration-200 cursor-pointer"
-          >
-            ✦ &nbsp;View Stats
-          </button>
-        </div>
       </div>
 
       {/* Bottom accent */}
-      <div
-        style={{
-          height: 1,
-          width: "100%",
-          position: "relative",
-          zIndex: 10,
-          background:
-            "linear-gradient(90deg,transparent,rgba(180,40,40,0.4),transparent)",
-        }}
-      />
     </div>
   );
 }
