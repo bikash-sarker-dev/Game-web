@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -191,6 +192,7 @@ function ParticipantRow({ participant }: { participant: Participant }) {
 export default function GrandFinale() {
   const [selected, setSelected] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const router = useRouter();
 
   const handleCrown = (id: number) => {
     setSelected((prev) => (prev === id ? null : id));
@@ -273,7 +275,8 @@ export default function GrandFinale() {
 
               {selected !== null && (
                 <button
-                  onClick={handleConfirm}
+                  //   onClick={handleConfirm}
+                  onClick={() => router.push("/round-two/round-two-five")}
                   className={`
                     flex-1 py-3 px-6 text-xs font-black tracking-[0.25em] uppercase rounded-lg
                     transition-all duration-300

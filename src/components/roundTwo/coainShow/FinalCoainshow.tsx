@@ -1,6 +1,9 @@
 "use client";
-import Button from "@/components/share/ButtonPrimary";
+
+import Image from "next/image";
 import { useEffect, useState } from "react";
+import coinImage from "@/assets/coin.png";
+import Button from "@/components/share/ButtonPrimary";
 
 interface Participant {
   id: number;
@@ -70,7 +73,7 @@ function SpinnerIcon() {
   );
 }
 
-export default function BatchJoining() {
+export default function RounTwoFinal() {
   const question = '"What is your deal-breaker?"';
   const [charIdx, setCharIdx] = useState(0);
   const [loading, setLoading] = useState(false); // ✅ NEW
@@ -81,6 +84,21 @@ export default function BatchJoining() {
       return () => clearTimeout(t);
     }
   }, [charIdx, question.length]);
+
+  // ✅ CLICK HANDLER
+  const handleSend = async () => {
+    setLoading(true);
+
+    try {
+      // 👉 simulate API call (replace with real API)
+      await new Promise((res) => setTimeout(res, 2000));
+      console.log("Sent!");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 flex flex-col gap-6 mt-22">
@@ -94,33 +112,54 @@ export default function BatchJoining() {
         <div className="4">
           <div className="text-center w-full">
             {/* Main Title */}
-            <h1 className="text-red-500 text-xl sm:text-2xl uppercase md:text-3xl lg:text-4xl font-semibold leading-relaxed">
-              THE Bach IS JUINGING...
-              <span className="ml-2">🌸</span>
+            <h1 className="text-white text-xl sm:text-2xl md:text-3xl  uppercase font-semibold leading-relaxed">
+              Thank YOU FOR PLAYING
             </h1>
-
-            {/* Subtitle */}
-            <p className="text-red-400 mt-4 text-sm sm:text-base md:text-lg font-medium">
-              Your fate is being decided.
+            <p className="text-[#52C41A] 6 text-xs sm:text-lg font-bold  leading-relaxed">
+              RUNNER UP : PLAYER 7
             </p>
+
+            <div className="flex justify-center mt-5">
+              <Image
+                src={coinImage}
+                alt="Game Over"
+                // width={244}
+                // height={200}
+                // className="w-20 h-20"
+                priority
+              />
+            </div>
+
+            {/* Description */}
+            <p className="text-gray-100 mt-6 text-xs sm:text-sm  leading-relaxed">
+              Try again next time. Don’t worry you got 1000 pts
+            </p>
+
             <div className="flex justify-center mt-4">
-              <SpinnerIcon />
+              {/* Actions */}
+              <div className={`flex gap-3 mt-7 flex-wrap justify-center `}>
+                {/* Play Again */}
+                <button
+                  className="font-[Rajdhani] font-bold tracking-[0.18em] text-[12px] uppercase px-7 py-2.5 rounded-[10px] 
+               border border-white/10 bg-white/5 text-white/70 
+               hover:bg-white/10 hover:border-white/20 
+               transition-all duration-200 cursor-pointer"
+                >
+                  ↺ &nbsp;Play Again
+                </button>
+
+                {/* View Stats */}
+                <button
+                  className="font-[Rajdhani] font-bold tracking-[0.18em] text-[12px] uppercase px-7 py-2.5 rounded-[10px] 
+               border border-yellow-400/30 bg-yellow-400/10 text-yellow-300 
+               hover:bg-yellow-400/20 hover:shadow-[0_0_12px_rgba(255,185,0,0.4)] 
+               transition-all duration-200 cursor-pointer"
+                >
+                  ✦ &nbsp;View Stats
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Active contestants strip */}
-      <div className="text-center">
-        <p className="text-white/30 text-xs uppercase tracking-widest mb-3">
-          Active Contestants
-        </p>
-        <div className="flex items-center justify-center flex-wrap gap-2">
-          {PARTICIPANTS.map((p, i) => (
-            <div key={p.id} className="relative">
-              <AvatarBubble initials={p.avatar} index={i} size="sm" ring />
-            </div>
-          ))}
         </div>
       </div>
     </div>

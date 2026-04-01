@@ -299,7 +299,7 @@ function PlayerCard({ player, index }: { player: Player; index: number }) {
               height: 14,
               zIndex: 5,
               border: `${c.borderWidth} solid rgba(255,185,0,0.72)`,
-              borderRadius: c.borderRadius,
+              //   borderRadius: c.borderRadius,
               ...c,
             }}
           />
@@ -342,7 +342,7 @@ function PlayerCard({ player, index }: { player: Player; index: number }) {
             display: "block",
             filter: w ? "none" : "grayscale(0.35) brightness(0.72)",
           }}
-          onError={(e) => {
+          onError={(e: any) => {
             (e.target as HTMLImageElement).style.display = "none";
           }}
         />
@@ -575,52 +575,29 @@ export default function GameOverScreen({
         </div>
 
         {/* Actions */}
+        {/* Actions */}
         <div
-          style={{
-            display: "flex",
-            gap: 12,
-            marginTop: 28,
-            flexWrap: "wrap",
-            justifyContent: "center",
-            animation: ready ? "gos-fade-up 0.6s ease 1.1s both" : "none",
-          }}
+          className={`flex gap-3 mt-7 flex-wrap justify-center ${
+            ready ? "animate-[gos-fade-up_0.6s_ease_1.1s_both]" : ""
+          }`}
         >
+          {/* Play Again */}
           <button
-            className="gos-btn-replay"
             onClick={onPlayAgain}
-            style={{
-              fontFamily: "'Rajdhani', sans-serif",
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              fontSize: 12,
-              textTransform: "uppercase",
-              padding: "10px 28px",
-              borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.12)",
-              background: "rgba(255,255,255,0.05)",
-              color: "rgba(240,240,240,0.75)",
-              cursor: "pointer",
-              transition: "background 0.2s, border-color 0.2s",
-            }}
+            className="font-[Rajdhani] font-bold tracking-[0.18em] text-[12px] uppercase px-7 py-2.5 rounded-[10px] 
+               border border-white/10 bg-white/5 text-white/70 
+               hover:bg-white/10 hover:border-white/20 
+               transition-all duration-200 cursor-pointer"
           >
             ↺ &nbsp;Play Again
           </button>
+
+          {/* View Stats */}
           <button
-            className="gos-btn-stats"
-            style={{
-              fontFamily: "'Rajdhani', sans-serif",
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              fontSize: 12,
-              textTransform: "uppercase",
-              padding: "10px 28px",
-              borderRadius: 10,
-              border: "1px solid rgba(255,185,0,0.3)",
-              background: "rgba(255,185,0,0.09)",
-              color: "rgba(255,210,100,0.9)",
-              cursor: "pointer",
-              transition: "background 0.2s, box-shadow 0.2s",
-            }}
+            className="font-[Rajdhani] font-bold tracking-[0.18em] text-[12px] uppercase px-7 py-2.5 rounded-[10px] 
+               border border-yellow-400/30 bg-yellow-400/10 text-yellow-300 
+               hover:bg-yellow-400/20 hover:shadow-[0_0_12px_rgba(255,185,0,0.4)] 
+               transition-all duration-200 cursor-pointer"
           >
             ✦ &nbsp;View Stats
           </button>

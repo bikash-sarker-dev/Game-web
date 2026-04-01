@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/share/ButtonPrimary";
+import { useRouter } from "next/navigation";
 import React, { useState, useRef, useCallback, useEffect } from "react";
 
 interface Contestant {
@@ -31,6 +32,7 @@ export default function RoundTwoStart() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const current = contestants.find((c) => c.id === activeContestant)!;
 
@@ -261,28 +263,14 @@ export default function RoundTwoStart() {
             />
 
             {uploadedImage && !isUploading && (
-              //   <button
-              //     onClick={() => setIsUploading(true)}
-              //     className="mt-4 w-full py-3.5 rounded-xl font-semibold text-sm sm:text-base tracking-wide bg-gradient-to-r from-red-700 to-red-500 hover:from-red-600 hover:to-red-400 text-white transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
-              //     style={{ boxShadow: "0 4px 30px rgba(220,38,38,0.35)" }}
-              //   >
-              //     <svg
-              //       className="w-4 h-4"
-              //       fill="none"
-              //       viewBox="0 0 24 24"
-              //       stroke="currentColor"
-              //     >
-              //       <path
-              //         strokeLinecap="round"
-              //         strokeLinejoin="round"
-              //         strokeWidth={2}
-              //         d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-              //       />
-              //     </svg>
-              //     Send Photo
-              //   </button>
               <div className="mt-6 flex justify-center">
-                <Button variant="game" onClick={() => setIsUploading(true)}>
+                <Button
+                  variant="game"
+                  onClick={() => {
+                    setIsUploading(true);
+                    router.push("/round-two/round-two-two");
+                  }}
+                >
                   <svg
                     className="w-4 h-4"
                     fill="none"

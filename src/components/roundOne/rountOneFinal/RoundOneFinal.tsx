@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import coinImage from "@/assets/coin.png";
 import Button from "@/components/share/ButtonPrimary";
+import { useRouter } from "next/navigation";
 
 interface Participant {
   id: number;
@@ -77,6 +78,7 @@ export default function RounOneFinal() {
   const question = '"What is your deal-breaker?"';
   const [charIdx, setCharIdx] = useState(0);
   const [loading, setLoading] = useState(false); // ✅ NEW
+  const router = useRouter();
 
   useEffect(() => {
     if (charIdx < question.length) {
@@ -137,7 +139,12 @@ export default function RounOneFinal() {
             </p>
 
             <div className="flex justify-center mt-8">
-              <Button variant="game">ADVANCE to ROUND 2</Button>
+              <Button
+                variant="game"
+                onClick={() => router.push("/round-two/round-two-one")}
+              >
+                ADVANCE to ROUND 2
+              </Button>
             </div>
           </div>
         </div>
