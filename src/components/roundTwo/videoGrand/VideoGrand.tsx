@@ -95,13 +95,7 @@ function PlayerCard({ player }: { player: Player }) {
   const [muted, setMuted] = useState(player.muted);
 
   return (
-    <div
-      className="relative rounded-2xl overflow-hidden border border-white/10 flex-1 min-w-[220px]"
-      style={{
-        background: "linear-gradient(160deg,#1a1a2e 0%,#0d0d1a 100%)",
-        boxShadow: "0 0 0 1px rgba(220,30,30,0.25), 0 8px 32px rgba(0,0,0,0.6)",
-      }}
-    >
+    <div className="relative rounded-2xl overflow-hidden border border-white/10 flex-1 min-w-[220px]">
       {/* Label row */}
       <div className="flex justify-center py-2.5 px-4">
         <span
