@@ -317,24 +317,28 @@ export default function VideoGrand() {
               }}
             >
               {/* Fake "video" background */}
+              {/* Background Image */}
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 bg-cover bg-center"
                 style={{
-                  background:
-                    "linear-gradient(135deg,#1a1a2e 0%,#2d1b1b 40%,#1a1a2e 100%)",
+                  backgroundImage: "url('/videoCall.jpg')",
                 }}
               />
+
+              {/* Dark overlay (important for readability) */}
+              <div className="absolute inset-0 bg-black/40" />
+
               {/* Scanline effect */}
-              <div
+              {/* <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
                   background:
                     "repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px)",
                 }}
-              />
+              /> */}
 
               {/* Centred host silhouette placeholder */}
-              <div className="absolute inset-0 flex items-center justify-center">
+              {/* <div className="absolute inset-0 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-3 opacity-30">
                   <svg
                     className="w-20 h-20 text-white/40"
@@ -350,7 +354,7 @@ export default function VideoGrand() {
                     Video Feed
                   </span>
                 </div>
-              </div>
+              </div> */}
 
               {/* LIVE badge */}
               <div className="absolute top-3 left-3 flex items-center gap-2">
