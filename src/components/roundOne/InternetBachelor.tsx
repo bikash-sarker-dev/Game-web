@@ -3,6 +3,7 @@
 import Button from "@/components/share/ButtonPrimary";
 import Image from "next/image";
 import RingImg from "@/assets/rings.png";
+import TitleImage from "@/assets/IB 19.png";
 import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -346,11 +347,11 @@ export default function InternetBachelor() {
       <div className=" bg-radial-[ellipse_at_center] from-transparent via-transparent to-black/70 pointer-events-none" />
 
       {/* ── Header ── */}
-      <div className="text-center pt-18 relative">
-        <h1 className="text-amber-400 font-extrabold text-2xl lg:text-4xl tracking-tight">
-          Internet Bachelor
-        </h1>
-        <p className="text-white uppercase text-2xl mt-2 font-semibold">
+      <div className="text-center pt-12 relative">
+        <div className="flex justify-center">
+          <Image src={TitleImage} alt="title" priority />
+        </div>
+        <p className="text-white uppercase text-2xl -mt-3  font-semibold">
           {screen === "lobby"
             ? "Lobby"
             : screen === "waiting"
