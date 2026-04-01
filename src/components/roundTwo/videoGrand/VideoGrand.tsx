@@ -306,13 +306,14 @@ export default function VideoGrand() {
           </div>
 
           {/* Main video area */}
-          <div className="px-4 sm:px-5">
+
+          <div className="px-2 sm:px-5">
             <div
-              className="relative rounded-2xl overflow-hidden glow-border"
+              className="relative rounded-xl sm:rounded-2xl overflow-hidden glow-border"
               style={{
                 border: "1.5px solid rgba(220,38,38,0.4)",
-                aspectRatio: "16/7",
-                minHeight: "200px",
+                aspectRatio: "16/9",
+                minHeight: "180px",
                 background: "#111",
               }}
             >
