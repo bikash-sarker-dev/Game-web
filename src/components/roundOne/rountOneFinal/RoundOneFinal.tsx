@@ -133,7 +133,7 @@ export default function RounOneFinal() {
             </p>
 
             <p className="text-gray-100 mt-6 text-xs sm:text-lg font-bold  leading-relaxed">
-              Round 1 Comeplete
+              Round 1 Complete
             </p>
 
             <div className="flex justify-center mt-8">
