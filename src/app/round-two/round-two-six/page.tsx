@@ -1,9 +1,9 @@
-import VideoGrand from "@/components/roundTwo/videoGrand/VideoGrand";
+import GameOverScreen from "@/components/roundTwo/gameOver/GameOver";
 
 const page = () => {
   return (
     <div>
-      <VideoGrand />
+      <GameOverScreen />
     </div>
   );
 };
