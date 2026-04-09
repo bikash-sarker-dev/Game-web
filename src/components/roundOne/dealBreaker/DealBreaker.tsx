@@ -127,7 +127,7 @@ export default function DealBreaker() {
 
         {/* ✅ BUTTON FIX */}
         <Button variant="game" onClick={handleSend} disabled={loading}>
-          {loading ? "Sending..." : "Send response 💌"}
+          {loading ? "Sending..." : "Send response"}
         </Button>
       </div>
 

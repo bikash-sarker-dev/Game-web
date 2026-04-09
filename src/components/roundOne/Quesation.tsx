@@ -121,13 +121,6 @@ export default function Questions() {
     <div
       className="min-h-screen w-full flex flex-col items-center justify-start
                  overflow-hidden"
-      //   style={{
-      //     backgroundImage: `
-      //       radial-gradient(ellipse 80% 50% at 20% 30%, rgba(180,20,20,0.18) 0%, transparent 70%),
-      //       radial-gradient(ellipse 60% 40% at 80% 70%, rgba(120,10,10,0.15) 0%, transparent 70%),
-      //       radial-gradient(ellipse 40% 60% at 50% 10%, rgba(200,30,30,0.08) 0%, transparent 60%)
-      //     `,
-      //   }}
     >
       {/* ── Top bar ── */}
       <header className="w-full max-w-7xl px-4 sm:px-6 pt-5 pb-2 flex items-center justify-between">
