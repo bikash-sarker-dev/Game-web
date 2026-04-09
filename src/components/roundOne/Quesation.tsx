@@ -784,13 +784,6 @@ export default function Questions() {
           <div className="h-px bg-gradient-to-r from-transparent via-orange-800/40 to-transparent" />
         </aside>
       </main>
-
-      {/* ── Bottom bar ── */}
-      <footer className="w-full max-w-6xl px-4 sm:px-6 pb-6 flex items-center justify-center">
-        <p className="text-zinc-700 text-xs tracking-widest">
-          QUIZ SHOW — HOST CONTROL PANEL
-        </p>
-      </footer>
     </div>
   );
 }

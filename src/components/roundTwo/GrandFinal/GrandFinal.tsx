@@ -41,7 +41,7 @@ const participants: Participant[] = [
     id: 1,
     name: "Savan Nguyen",
     avatar: "https://i.pravatar.cc/40?img=11",
-    status: "READY",
+    status: "OUT",
   },
   {
     id: 2,
@@ -65,7 +65,7 @@ const participants: Participant[] = [
     id: 5,
     name: "Annette Black",
     avatar: "https://i.pravatar.cc/40?img=15",
-    status: "READY",
+    status: "OUT",
   },
   {
     id: 6,
@@ -263,7 +263,7 @@ export default function GrandFinale() {
 
             {/* Choose Neither + Confirm */}
             <div className="flex flex-col sm:flex-row gap-3 rounded-xl border border-orange-900/40 bg-black/40 backdrop-blur-sm p-4">
-              <button
+              {/* <button
                 onClick={handleNeither}
                 className="flex-1 py-3 px-6 text-xs font-black tracking-[0.25em] uppercase rounded-lg
                   border border-red-700/60 bg-red-900/20 text-red-400
@@ -271,7 +271,7 @@ export default function GrandFinale() {
                   transition-all duration-300 hover:shadow-[0_0_15px_rgba(220,38,38,0.3)]"
               >
                 Choose Neither
-              </button>
+              </button> */}
 
               {selected !== null && (
                 <button
