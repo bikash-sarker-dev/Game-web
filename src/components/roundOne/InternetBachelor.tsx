@@ -709,6 +709,7 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const [isLoading, setIsLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -731,6 +732,11 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
     if (!v) return;
     v.play().catch(() => {});
   }, []);
+
+  function handleCanPlay() {
+    setIsLoading(false);
+    videoRef.current?.play().catch(() => {});
+  }
 
   // Auto-advance countdown when video ends
   useEffect(() => {
@@ -796,11 +802,25 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
     <div className="w-full max-w-6xl mx-auto px-4 flex flex-col gap-4">
       {/* Video wrapper */}
       <div className="relative rounded-2xl bg-black overflow-hidden">
+        {/* Loading overlay — shown until video is ready from server */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-black flex flex-col items-center justify-center gap-5 z-10">
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 rounded-full border-2 border-white/10" />
+              <div className="absolute inset-0 rounded-full border-2 border-t-amber-400 border-r-rose-500 border-b-transparent border-l-transparent animate-spin" />
+            </div>
+            <p className="text-white/50 text-xs uppercase tracking-[0.3em] font-semibold">
+              Loading video...
+            </p>
+          </div>
+        )}
+
         {/* Video element — always visible, plays default video */}
         <video
           ref={videoRef}
           src={DEFAULT_VIDEO_SRC}
           className="w-full max-h-[80vh] object-cover bg-black"
+          onCanPlay={handleCanPlay}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onTimeUpdate={handleTimeUpdate}
