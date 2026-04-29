@@ -1,5 +1,5 @@
-import InternetBachelor from "@/components/roundOne/InternetBachelor";
+import StartGame from "@/components/startgame/StartGame";
 
 export default function Home() {
-  return <InternetBachelor />;
+  return <StartGame />;
 }

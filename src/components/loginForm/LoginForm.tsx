@@ -269,20 +269,11 @@ export default function SignInForm() {
   const onSubmit = async (data: FormValues) => {
     try {
       const response = await signIn(data).unwrap();
+      console.log(response);
 
-      if (response?.success) {
-        Cookies.set("token", response.data.accessToken);
-        router.push("/");
-
-        dispatch(
-          setUser({
-            token: response.data.accessToken,
-          }),
-        );
-
-        toast.success("Login successful");
-        router.push("/dashboard");
-      }
+      Cookies.set("token", response.token);
+      router.push("/");
+      //   toast.success("Login successful");
     } catch (error: any) {
       toast.error(error?.data?.message || "Login failed");
     }
