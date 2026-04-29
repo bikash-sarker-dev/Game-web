@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
+import ReduxProvider from "@/redux/Provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Game",
+  title: "Dating Game",
   description: "this is a Game app",
 };
 
@@ -29,10 +30,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Navbar />
-        <main className="bg-[url('/p-bg.png')] bg-cover  bg-no-repeat min-h-screen">
-          {children}
-        </main>
+        <ReduxProvider>
+          <Navbar />
+          <main className="bg-[url('/p-bg.png')] bg-cover  bg-no-repeat min-h-screen">
+            {children}
+          </main>
+        </ReduxProvider>
       </body>
     </html>
   );
