@@ -634,7 +634,7 @@ export default function ThinkingProccess() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const router = useRouter();
 
-  useSocket({
+  const { sendEvent } = useSocket({
     GAME_EVENT: (payload) => {
       console.log("🎮 Game Event received:", payload);
 
@@ -653,10 +653,24 @@ export default function ThinkingProccess() {
 
   const handleEliminate = (userId: string) => {
     setLoadingId(userId);
-    setTimeout(() => {
-      setPlayers((prev) => prev.filter((p) => p.userId !== userId));
-      router.push("/round/three");
-    }, 2000);
+
+    sendEvent(
+      "GAME_EVENT",
+      {
+        gameId: "internet-bachelor-123",
+        type: "ELIMINATE",
+        payload: {
+          playerIds: [userId],
+          points: 100,
+        },
+      },
+      (response) => {
+        console.log("✅ Eliminate ACK:", response);
+        setLoadingId(null);
+        // setPlayers((prev) => prev.filter((p) => p.userId !== userId));
+        // router.push("/round/three");
+      },
+    );
   };
 
   useEffect(() => {
