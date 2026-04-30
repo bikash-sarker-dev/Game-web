@@ -298,8 +298,11 @@
 "use client";
 
 import Button from "@/components/share/ButtonPrimary";
+import { useSocket } from "@/hooks/useSocket";
 import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect } from "react";
+import { mapServerPlayers } from "./InternetBachelor";
+import ParticipantPanel from "./Participantpanel";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -308,6 +311,24 @@ interface Participant {
   name: string;
   avatar: string;
   status: "READY" | "WAITING" | "OFFLINE";
+}
+
+export interface Participants {
+  id: string;
+  name: string;
+  avatar: string;
+  ready: boolean;
+  isEliminated?: boolean;
+  isConnected?: boolean;
+}
+interface ServerPlayer {
+  id: string;
+  socketId: string;
+  isEliminated: boolean;
+  isReady: boolean;
+  isConnected: boolean;
+  username?: string;
+  name?: string;
 }
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
@@ -588,26 +609,39 @@ export default function Questions() {
   const [sending, setSending] = useState(false);
   const router = useRouter();
 
+  // Fix 1: state type matches what mapServerPlayers returns
+  const [participants, setParticipants] = useState<Participants[]>([]);
+
+  const { sendEvent, isConnected } = useSocket({
+    GAME_EVENT: (payload) => {
+      console.log("🎮 Game Event received:", payload);
+    },
+  });
+
   const handleSend = async () => {
     if (!question.trim()) return;
 
     setSending(true);
 
-    try {
-      // 👉 simulate API call
-      await new Promise((res) => setTimeout(res, 1000));
+    sendEvent(
+      "GAME_EVENT",
+      {
+        gameId: "internet-bachelor-123",
+        type: "SEND_QUESTION",
+        payload: {
+          question: question.trim(),
+        },
+      },
+      (response) => {
+        console.log("✅ Server ACK:", response);
+        setSending(false);
+        setSent(true);
 
-      setSending(false);
-      setSent(true);
-
-      // 👉 show success message for 1.5s
-      setTimeout(() => {
-        router.push("/round/two");
-      }, 1500);
-    } catch (error) {
-      console.error(error);
-      setSending(false);
-    }
+        // setTimeout(() => {
+        //   router.push("/round/two");
+        // }, 1500);
+      },
+    );
   };
 
   const readyCount = PARTICIPANTS.filter((p) => p.status === "READY").length;
@@ -621,9 +655,8 @@ export default function Questions() {
       {/* ── Top bar ── */}
       <header className="w-full max-w-7xl px-4 sm:px-6 pt-5 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
           <span className="text-red-400/80 text-xs font-semibold tracking-widest uppercase">
-            Live
+            <p> {isConnected() ? "🟢 Connected" : "🔴 Disconnected"}</p>
           </span>
         </div>
         <div className="text-zinc-600 text-xs">
@@ -751,38 +784,7 @@ export default function Questions() {
         </section>
 
         {/* ── Right: Participants panel ── */}
-        <aside
-          className="rounded-2xl border border-orange-900/40
-                     bg-gradient-to-b from-[#1c0c06]/80 to-[#130806]/80
-                     backdrop-blur-sm overflow-hidden
-                     shadow-[0_0_40px_rgba(180,60,20,0.1)]"
-        >
-          {/* Glowing top edge */}
-          <div className="h-px bg-gradient-to-r from-transparent via-orange-700/50 to-transparent" />
-
-          {/* Header */}
-          <div className="px-4 sm:px-5 pt-5 pb-3 flex items-center justify-between">
-            <h2 className="text-base sm:text-lg font-black tracking-[0.18em] uppercase text-zinc-100">
-              Participants
-            </h2>
-            <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-full">
-              {readyCount} Ready
-            </span>
-          </div>
-
-          {/* Divider */}
-          <div className="mx-4 sm:mx-5 h-px bg-white/5 mb-2" />
-
-          {/* List */}
-          <div className="px-2 sm:px-3 pb-4 flex flex-col">
-            {PARTICIPANTS.map((p, i) => (
-              <ParticipantRow key={p.id} p={p} index={i} />
-            ))}
-          </div>
-
-          {/* Bottom glow */}
-          <div className="h-px bg-gradient-to-r from-transparent via-orange-800/40 to-transparent" />
-        </aside>
+        <ParticipantPanel />
       </main>
     </div>
   );

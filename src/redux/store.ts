@@ -12,7 +12,7 @@ import {
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 
 import userReducer from "./features/user/userSlice";
-
+import participantsReducer from "./features/sidePanel/participantsSlice";
 import baseApi from "./api/baseApi";
 
 // Noop storage for SSR
@@ -28,7 +28,6 @@ const createNoopStorage = () => ({
   },
 });
 
-// Use localStorage only on client
 const storage =
   typeof window !== "undefined"
     ? createWebStorage("local")
@@ -37,18 +36,19 @@ const storage =
 const persistConfig = {
   key: "root",
   storage,
-  blacklist: [baseApi.reducerPath],
+  blacklist: [baseApi.reducerPath, "participants"], // ✅ don't persist socket data
 };
 
 const rootReducer = combineReducers({
   user: userReducer,
+  participants: participantsReducer, // ✅ moved inside combineReducers
   [baseApi.reducerPath]: baseApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: persistedReducer, // ✅ single reducer here
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
@@ -59,6 +59,5 @@ export const store = configureStore({
 
 export const persistor = persistStore(store);
 
-// ✅ Type exports
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

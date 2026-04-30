@@ -7,6 +7,7 @@
 // import { useState, useEffect, useRef, useCallback } from "react";
 // import { Check } from "lucide-react";
 // import { useRouter } from "next/navigation";
+// import { useSocket } from "@/hooks/useSocket";
 
 // // ─── Types ───────────────────────────────────────────────────────────────────
 // type Screen = "lobby" | "video" | "spectating";
@@ -43,7 +44,7 @@
 
 // // ─── Sub-components ───────────────────────────────────────────────────────────
 
-// function AvatarBubble({
+// export function AvatarBubble({
 //   initials,
 //   index,
 //   size = "md",
@@ -173,6 +174,7 @@
 //   const videoRef = useRef<HTMLVideoElement>(null);
 //   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+//   const [isLoading, setIsLoading] = useState(true);
 //   const [isPlaying, setIsPlaying] = useState(false);
 //   const [progress, setProgress] = useState(0);
 //   const [currentTime, setCurrentTime] = useState(0);
@@ -195,6 +197,11 @@
 //     if (!v) return;
 //     v.play().catch(() => {});
 //   }, []);
+
+//   function handleCanPlay() {
+//     setIsLoading(false);
+//     videoRef.current?.play().catch(() => {});
+//   }
 
 //   // Auto-advance countdown when video ends
 //   useEffect(() => {
@@ -257,18 +264,28 @@
 //   const strokeOffset = CIRCUMFERENCE - ((3 - countdown) / 3) * CIRCUMFERENCE;
 
 //   return (
-//     <div className="w-full max-w-4xl mx-auto px-4 flex flex-col gap-6">
-//       <p className="text-white/40 uppercase tracking-[0.25em] text-xs font-semibold">
-//         Video Introduction
-//       </p>
-
+//     <div className="w-full max-w-6xl mx-auto px-4 flex flex-col gap-4">
 //       {/* Video wrapper */}
-//       <div className="relative rounded-2xl border border-amber-500/40 bg-black overflow-hidden">
+//       <div className="relative rounded-2xl bg-black overflow-hidden">
+//         {/* Loading overlay — shown until video is ready from server */}
+//         {isLoading && (
+//           <div className="absolute inset-0 bg-black flex flex-col items-center justify-center gap-5 z-10">
+//             <div className="relative w-16 h-16">
+//               <div className="absolute inset-0 rounded-full border-2 border-white/10" />
+//               <div className="absolute inset-0 rounded-full border-2 border-t-amber-400 border-r-rose-500 border-b-transparent border-l-transparent animate-spin" />
+//             </div>
+//             <p className="text-white/50 text-xs uppercase tracking-[0.3em] font-semibold">
+//               Loading video...
+//             </p>
+//           </div>
+//         )}
+
 //         {/* Video element — always visible, plays default video */}
 //         <video
 //           ref={videoRef}
 //           src={DEFAULT_VIDEO_SRC}
-//           className="w-full max-h-[480px] object-contain bg-black"
+//           className="w-full max-h-[80vh] object-cover bg-black"
+//           onCanPlay={handleCanPlay}
 //           onPlay={() => setIsPlaying(true)}
 //           onPause={() => setIsPlaying(false)}
 //           onTimeUpdate={handleTimeUpdate}
@@ -480,6 +497,27 @@
 // export default function InternetBachelor() {
 //   const [screen, setScreen] = useState<Screen>("lobby");
 
+//   const { sendEvent, isConnected } = useSocket({
+//     GAME_EVENT: (payload) => {
+//       console.log("🎮 Game Event received:", payload);
+
+//       // Handle different game event types
+//       switch (payload.type) {
+//         case "GAME_STARTED":
+//           console.log("Game started!");
+//           break;
+//         case "PLAYERS_UPDATE":
+//           console.log("Players:", payload.players);
+//           break;
+//         case "ROSE_GIVEN":
+//           console.log("Rose given!");
+//           break;
+//         default:
+//           console.log("Unknown event:", payload);
+//       }
+//     },
+//   });
+
 //   return (
 //     <div className="">
 //       {/* Vignette */}
@@ -543,28 +581,45 @@ import TitleImage from "@/assets/IB 19.png";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSocket } from "@/hooks/useSocket";
+import ParticipantPanel, { type Participant } from "./Participantpanel";
+import { useSocketSync } from "@/hooks/useSocketSync";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 type Screen = "lobby" | "video" | "spectating";
 
-interface Participant {
-  id: number;
-  name: string;
-  avatar: string;
-  ready: boolean;
+interface ServerPlayer {
+  id: string;
+  socketId: string;
+  isEliminated: boolean;
+  isReady: boolean;
+  isConnected: boolean;
+  username?: string;
+  name?: string;
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const PARTICIPANTS: Participant[] = [
-  { id: 1, name: "Savan Nguyen", avatar: "SN", ready: true },
-  { id: 2, name: "Darrell Steward", avatar: "DS", ready: true },
-  { id: 3, name: "Jane Cooper", avatar: "JC", ready: true },
-  { id: 4, name: "Esther Howard", avatar: "EH", ready: true },
-  { id: 5, name: "Jerome Bell", avatar: "JB", ready: true },
-  { id: 6, name: "Annette Black", avatar: "AB", ready: true },
-  { id: 7, name: "Ronald Richards", avatar: "RR", ready: true },
-  { id: 8, name: "Eleanor Pena", avatar: "EP", ready: true },
-];
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+export function mapServerPlayers(players: ServerPlayer[]): Participant[] {
+  return players.map((p) => {
+    const displayName = p.username ?? p.name ?? `Player ${p.id.slice(-4)}`;
+    return {
+      id: p.id,
+      name: displayName,
+      avatar: getInitials(displayName),
+      ready: p.isReady,
+      isEliminated: p.isEliminated,
+      isConnected: p.isConnected,
+    };
+  });
+}
 
 const AVATAR_COLORS = [
   "from-rose-500 to-pink-600",
@@ -578,17 +633,18 @@ const AVATAR_COLORS = [
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
-function AvatarBubble({
+export function AvatarBubble({
   initials,
   index,
   size = "md",
   ring = false,
+  dimmed = false,
 }: {
   initials: string;
   index: number;
   size?: "sm" | "md" | "lg";
   ring?: boolean;
+  dimmed?: boolean;
 }) {
   const sizeClasses = {
     sm: "w-9 h-9 text-xs",
@@ -602,7 +658,8 @@ function AvatarBubble({
         ${AVATAR_COLORS[index % AVATAR_COLORS.length]}
         flex items-center justify-center font-bold text-white flex-shrink-0
         ${ring ? "ring-2 ring-amber-400/60 ring-offset-1 ring-offset-black" : ""}
-        shadow-lg
+        ${dimmed ? "opacity-40 grayscale" : ""}
+        shadow-lg transition-all duration-300
       `}
     >
       {initials}
@@ -636,9 +693,83 @@ function RoseIcon({ className = "" }: { className?: string }) {
   );
 }
 
+// ─── Active Contestants Strip ─────────────────────────────────────────────────
+function ContestantStrip({
+  participants,
+  showOnlineIndicator = false,
+}: {
+  participants: Participant[];
+  showOnlineIndicator?: boolean;
+}) {
+  const active = participants.filter((p) => !p.isEliminated);
+
+  return (
+    <div className="text-center">
+      <p className="text-white/30 text-xs uppercase tracking-widest mb-3">
+        Active Contestants ({active.length}/{participants.length})
+      </p>
+      {participants.length === 0 ? (
+        <p className="text-white/30 text-sm italic">No participants yet</p>
+      ) : (
+        <div className="flex items-center justify-center flex-wrap gap-2">
+          {participants.map((p, i) => (
+            <div key={p.id} className="relative">
+              <AvatarBubble
+                initials={p.avatar}
+                index={i}
+                size="sm"
+                ring={!p.isEliminated}
+                dimmed={p.isEliminated}
+              />
+              {showOnlineIndicator && (
+                <span
+                  className={`absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full border border-black ${
+                    p.isConnected ? "bg-emerald-400" : "bg-red-500"
+                  }`}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Screen 1: Host Lobby ─────────────────────────────────────────────────────
-function LobbyScreen({ onStart }: { onStart: () => void }) {
-  const readyCount = PARTICIPANTS.filter((p) => p.ready).length;
+function LobbyScreen({
+  onStart,
+  participants,
+}: {
+  onStart: () => void;
+  participants: Participant[];
+}) {
+  const router = useRouter();
+  const readyCount = participants.filter((p) => p.ready).length;
+  const connectedCount = participants.filter(
+    (p) => p.isConnected !== false,
+  ).length;
+  const { sendEvent, isConnected } = useSocket({
+    GAME_EVENT: (payload) => {
+      console.log("🎮 Game Event received:", payload);
+    },
+  });
+  const handleStartGame = () => {
+    sendEvent(
+      "GAME_EVENT",
+      {
+        gameId: "internet-bachelor-123",
+        type: "START_GAME",
+        payload: {},
+      },
+      (response) => {
+        console.log("✅ Server ACK:", response);
+        if (response.success) {
+          router.push("/round/one");
+        }
+      },
+    );
+  };
 
   return (
     <div className="flex flex-col lg:flex-row gap-5 w-full max-w-7xl mx-auto px-4">
@@ -648,15 +779,18 @@ function LobbyScreen({ onStart }: { onStart: () => void }) {
           <p className="text-white/50 uppercase tracking-[0.3em] text-xs font-semibold mb-1">
             Status
           </p>
-          <h2 className="text-white font-extrabold text-lg sm:text-xl tracking-widest uppercase mb-4">
+          <h2 className="text-white font-extrabold text-lg sm:text-xl tracking-widest uppercase mb-1">
             Waiting for Contestants{" "}
             <span className="text-amber-400">
-              ({readyCount}/{PARTICIPANTS.length})
+              ({readyCount}/{participants.length})
             </span>
           </h2>
+          {participants.length > 0 && (
+            <p className="text-white/40 text-xs">{connectedCount} connected</p>
+          )}
         </div>
 
-        <Button variant="game" onClick={onStart}>
+        <Button variant="game" onClick={handleStartGame}>
           ▶ START GAME
         </Button>
 
@@ -677,35 +811,21 @@ function LobbyScreen({ onStart }: { onStart: () => void }) {
       </div>
 
       {/* Participants panel */}
-      <div className="lg:w-72 rounded-2xl border border-amber-500/30 bg-black/60 backdrop-blur-sm p-5">
-        <h3 className="text-white/40 uppercase tracking-[0.25em] text-base font-bold mb-4">
-          Participants
-        </h3>
-        <ul className="space-y-2">
-          {PARTICIPANTS.map((p, i) => (
-            <li key={p.id} className="flex items-center gap-3 group">
-              <AvatarBubble initials={p.avatar} index={i} size="sm" />
-              <span className="flex-1 text-white/80 text-sm font-medium truncate group-hover:text-white transition-colors">
-                {p.name}
-              </span>
-              {p.ready && (
-                <span className="text-emerald-400 text-[10px] font-extrabold uppercase tracking-widest">
-                  Ready
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ParticipantPanel />
     </div>
   );
 }
 
 // ─── Screen 2: Video Intro ────────────────────────────────────────────────────
-// Place your video at /public/videos/intro.mp4
 const DEFAULT_VIDEO_SRC = "/videos/IB_2.mp4";
 
-function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
+function VideoScreen({
+  onAdvance,
+  participants,
+}: {
+  onAdvance: () => void;
+  participants: Participant[];
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -718,7 +838,7 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
   const [showEnded, setShowEnded] = useState(false);
   const [countdown, setCountdown] = useState(3);
 
-  const CIRCUMFERENCE = 2 * Math.PI * 24; // ≈ 150.8
+  const CIRCUMFERENCE = 2 * Math.PI * 24;
 
   const advance = useCallback(() => {
     if (countdownRef.current) clearInterval(countdownRef.current);
@@ -726,7 +846,6 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
     onAdvance();
   }, [onAdvance]);
 
-  // Auto-play when this screen mounts
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -738,7 +857,6 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
     videoRef.current?.play().catch(() => {});
   }
 
-  // Auto-advance countdown when video ends
   useEffect(() => {
     if (!showEnded) return;
     let count = 3;
@@ -797,12 +915,12 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
   }
 
   const strokeOffset = CIRCUMFERENCE - ((3 - countdown) / 3) * CIRCUMFERENCE;
+  const activePlayers = participants.filter((p) => !p.isEliminated);
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 flex flex-col gap-4">
       {/* Video wrapper */}
       <div className="relative rounded-2xl bg-black overflow-hidden">
-        {/* Loading overlay — shown until video is ready from server */}
         {isLoading && (
           <div className="absolute inset-0 bg-black flex flex-col items-center justify-center gap-5 z-10">
             <div className="relative w-16 h-16">
@@ -815,7 +933,6 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
           </div>
         )}
 
-        {/* Video element — always visible, plays default video */}
         <video
           ref={videoRef}
           src={DEFAULT_VIDEO_SRC}
@@ -828,15 +945,12 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
           playsInline
         />
 
-        {/* Ended overlay */}
         {showEnded && (
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-4">
             <span className="text-5xl animate-bounce">🌹</span>
             <p className="text-amber-400 font-extrabold text-lg uppercase tracking-widest">
               Video Complete!
             </p>
-
-            {/* Countdown ring */}
             <div className="relative w-14 h-14">
               <svg className="absolute inset-0 -rotate-90" viewBox="0 0 56 56">
                 <circle
@@ -864,7 +978,6 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
                 {countdown}
               </span>
             </div>
-
             <p className="text-white/40 text-xs tracking-widest">
               Advancing to spectating...
             </p>
@@ -874,7 +987,6 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
 
       {/* Controls bar */}
       <div className="rounded-2xl border border-amber-500/20 bg-black/70 backdrop-blur-sm px-5 py-4 flex items-center gap-4 flex-wrap">
-        {/* Play / Pause */}
         <button
           onClick={handlePlayPause}
           className="w-10 h-10 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-400 flex items-center justify-center text-sm hover:bg-amber-400/20 transition-colors flex-shrink-0"
@@ -882,7 +994,6 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
           {isPlaying ? "⏸" : "▶"}
         </button>
 
-        {/* Progress bar */}
         <div className="flex-1 min-w-[120px] flex flex-col gap-1">
           <div
             className="w-full h-1 bg-white/10 rounded-full cursor-pointer relative"
@@ -898,7 +1009,6 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
           </span>
         </div>
 
-        {/* Speed */}
         <select
           value={speed}
           onChange={handleSpeedChange}
@@ -911,32 +1021,18 @@ function VideoScreen({ onAdvance }: { onAdvance: () => void }) {
           <option value={3}>3×</option>
         </select>
 
-        {/* Skip */}
         <Button variant="game" onClick={advance}>
           ⏭ Skip
         </Button>
       </div>
 
-      {/* Active contestants strip */}
-      <div className="text-center">
-        <p className="text-white/30 text-xs uppercase tracking-widest mb-3">
-          Active Contestants
-        </p>
-        <div className="flex items-center justify-center flex-wrap gap-2">
-          {PARTICIPANTS.map((p, i) => (
-            <div key={p.id} className="relative">
-              <AvatarBubble initials={p.avatar} index={i} size="sm" ring />
-              <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-black" />
-            </div>
-          ))}
-        </div>
-      </div>
+      <ContestantStrip participants={activePlayers} showOnlineIndicator />
     </div>
   );
 }
 
 // ─── Screen 3: Spectating ─────────────────────────────────────────────────────
-function SpectatingScreen() {
+function SpectatingScreen({ participants }: { participants: Participant[] }) {
   const question = '"CONNECTED TO LOBBY"';
   const [charIdx, setCharIdx] = useState(0);
   const router = useRouter();
@@ -948,6 +1044,8 @@ function SpectatingScreen() {
     }
   }, [charIdx, question.length]);
 
+  const activePlayers = participants.filter((p) => !p.isEliminated);
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 flex flex-col gap-6">
       <p className="text-white/40 uppercase tracking-[0.25em] text-xs font-semibold">
@@ -955,7 +1053,6 @@ function SpectatingScreen() {
       </p>
 
       <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-black/90 to-rose-950/50 backdrop-blur-sm p-8 sm:p-14 flex flex-col items-center gap-8 min-h-[280px] justify-center">
-        {/* Animated question */}
         <div className="text-center">
           <p className="text-white font-bold text-lg sm:text-2xl italic leading-relaxed min-h-[3.5rem]">
             {question.slice(0, charIdx)}
@@ -979,19 +1076,7 @@ function SpectatingScreen() {
         </Button>
       </div>
 
-      {/* Active contestants strip */}
-      <div className="text-center">
-        <p className="text-white/30 text-xs uppercase tracking-widest mb-3">
-          Active Contestants
-        </p>
-        <div className="flex items-center justify-center flex-wrap gap-2">
-          {PARTICIPANTS.map((p, i) => (
-            <div key={p.id} className="relative">
-              <AvatarBubble initials={p.avatar} index={i} size="sm" ring />
-            </div>
-          ))}
-        </div>
-      </div>
+      <ContestantStrip participants={activePlayers} />
     </div>
   );
 }
@@ -1030,7 +1115,44 @@ function NavTabs({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function InternetBachelor() {
+  useSocketSync();
   const [screen, setScreen] = useState<Screen>("lobby");
+  const [participants, setParticipants] = useState<Participant[]>([]);
+
+  const { sendEvent, isConnected } = useSocket({
+    GAME_EVENT: (payload) => {
+      console.log("🎮 Game Event received:", payload);
+
+      switch (payload.type) {
+        case "PLAYERS_UPDATE": {
+          const players = payload.payload as ServerPlayer[];
+          if (Array.isArray(players)) {
+            setParticipants(mapServerPlayers(players));
+          }
+          break;
+        }
+
+        case "GAME_STARTED":
+          console.log("Game started!");
+          setScreen("video");
+          break;
+
+        case "ROSE_GIVEN":
+          console.log("Rose given!");
+          break;
+
+        default:
+          console.log("Unknown event:", payload);
+      }
+    },
+  });
+
+  const screenTitle =
+    screen === "lobby"
+      ? "Lobby"
+      : screen === "video"
+        ? "Video Intro"
+        : "Live Duel";
 
   return (
     <div className="">
@@ -1043,12 +1165,19 @@ export default function InternetBachelor() {
           <Image src={TitleImage} alt="title" priority />
         </div>
         <p className="text-white uppercase text-2xl -mt-3 font-semibold">
-          {screen === "lobby"
-            ? "Lobby"
-            : screen === "video"
-              ? "Video Intro"
-              : "Live Duel"}
+          {screenTitle}
         </p>
+        {/* Connection indicator */}
+        <div className="flex items-center justify-center gap-1.5 mt-1">
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              isConnected ? "bg-emerald-400 animate-pulse" : "bg-red-500"
+            }`}
+          />
+          <span className="text-white/30 text-[10px] uppercase tracking-widest">
+            {isConnected ? "Live" : "Disconnected"}
+          </span>
+        </div>
       </div>
 
       {/* ── Screen Nav ── */}
@@ -1060,12 +1189,20 @@ export default function InternetBachelor() {
       <div className="relative z-10 flex flex-col items-center justify-center py-10 px-2">
         <div className="w-full">
           {screen === "lobby" && (
-            <LobbyScreen onStart={() => setScreen("video")} />
+            <LobbyScreen
+              onStart={() => setScreen("video")}
+              participants={participants}
+            />
           )}
           {screen === "video" && (
-            <VideoScreen onAdvance={() => setScreen("spectating")} />
+            <VideoScreen
+              onAdvance={() => setScreen("spectating")}
+              participants={participants}
+            />
           )}
-          {screen === "spectating" && <SpectatingScreen />}
+          {screen === "spectating" && (
+            <SpectatingScreen participants={participants} />
+          )}
         </div>
       </div>
 
