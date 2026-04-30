@@ -637,9 +637,9 @@ export default function Questions() {
         setSending(false);
         setSent(true);
 
-        // setTimeout(() => {
-        //   router.push("/round/two");
-        // }, 1500);
+        setTimeout(() => {
+          router.push("/round/two");
+        }, 1500);
       },
     );
   };

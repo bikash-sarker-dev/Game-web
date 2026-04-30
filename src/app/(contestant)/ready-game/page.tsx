@@ -1,9 +1,9 @@
-import ReadyContestant from "@/components/contestants/readyContestant/RadyContextant";
+import QuesationShowAndAns from "@/components/contestants/quesationShow/QuesationShowAndAns";
 
 const page = () => {
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <ReadyContestant />
+      <QuesationShowAndAns />
     </div>
   );
 };
