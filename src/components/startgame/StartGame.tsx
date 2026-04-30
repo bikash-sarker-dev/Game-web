@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
 
 // import React, { useEffect, useRef } from "react";
@@ -453,12 +454,26 @@ const StartGame: React.FC = () => {
     };
   }, [token]);
 
+  //   const sendEvent = (type: string, payload?: any) => {
+  //     if (!socketRef.current?.connected) {
+  //       console.warn("⚠️ Socket not connected");
+  //       return;
+  //     }
+  //     // const res = socketRef.current.emit(type, payload);
+  //     // console.log("yes", res);
+  //   };
+
   const sendEvent = (type: string, payload?: any) => {
-    if (!socketRef.current?.connected) {
+    if (!socketRef.current || !socketRef.current.connected) {
       console.warn("⚠️ Socket not connected");
       return;
     }
-    socketRef.current.emit(type, payload);
+
+    console.log("📤 Sending:", type, payload);
+
+    socketRef.current.emit(type, payload, (response: any) => {
+      console.log("✅ Server ACK:", response);
+    });
   };
 
   return (
@@ -505,7 +520,11 @@ const StartGame: React.FC = () => {
 
         <div className="flex flex-wrap gap-6 mt-10 justify-center">
           <button
-            onClick={() => sendEvent("CREATE_GAME", { role: "BACHELOR" })}
+            onClick={() =>
+              sendEvent("CREATE_GAME", {
+                gameType: "INTERNET_BACHELOR",
+              })
+            }
             className="relative px-8 py-4 font-bold uppercase tracking-widest text-black bg-gradient-to-br from-yellow-200 via-yellow-400 to-orange-600 clip-path-polygon shadow-[0_0_40px_rgba(255,180,0,0.6)] hover:scale-105 transition"
           >
             BE THE BACHELOR
@@ -513,7 +532,11 @@ const StartGame: React.FC = () => {
           </button>
 
           <button
-            onClick={() => sendEvent("JOIN_GAME", { role: "CONTESTANT" })}
+            onClick={() =>
+              sendEvent("JOIN_GAME", {
+                gameId: "internet-bachelor-123",
+              })
+            }
             className="relative px-8 py-4 font-bold uppercase tracking-widest text-teal-100 border border-teal-400 bg-gradient-to-br from-teal-500 to-teal-900 hover:scale-105 transition shadow-lg"
           >
             BE A CONTESTANT
