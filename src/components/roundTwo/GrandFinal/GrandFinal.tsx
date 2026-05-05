@@ -1873,7 +1873,7 @@ export default function GrandFinale() {
           console.log("✅ ELIMINATE ACK:", response);
 
           if (response?.success) {
-            router.push("/round-two/round-two-six");
+            router.replace("/round-two/round-two-six");
           } else {
             console.warn("❌ Eliminate failed:", response);
           }
@@ -1882,18 +1882,6 @@ export default function GrandFinale() {
     },
     [sendEvent, router],
   );
-
-  // ── Play Again — reset local game-over state ──────────────────────────────
-  const handlePlayAgain = useCallback(() => {
-    setGameOver(null);
-  }, []);
-
-  // ── GAME_ENDED: show GameOverScreen ───────────────────────────────────────
-  if (gameOver) {
-    const { winner } = gameOver;
-
-    router.push("/round-two/round-two-six");
-  }
 
   return (
     <div className="w-full max-w-7xl mx-auto relative overflow-hidden font-sans">
