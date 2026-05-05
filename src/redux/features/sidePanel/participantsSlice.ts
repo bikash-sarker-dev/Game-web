@@ -1,13 +1,17 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface Participant {
-  isReady: unknown;
   id: string;
   name: string;
   avatar: string;
-  ready: boolean;
-  isEliminated?: boolean;
-  isConnected?: boolean;
+
+  isReady: boolean;
+  isEliminated: boolean;
+  isConnected: boolean;
+
+  points: number;
+  hasNetworkIssue: boolean;
+  hasSubmitted: boolean;
 }
 
 interface ParticipantsState {

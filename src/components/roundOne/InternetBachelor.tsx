@@ -584,10 +584,20 @@ import { useRouter } from "next/navigation";
 import { useSocket } from "@/hooks/useSocket";
 import ParticipantPanel from "./Participantpanel";
 import { useSocketSync } from "@/hooks/useSocketSync";
-import { Participant } from "@/redux/features/sidePanel/participantsSlice";
+// import { Participant } from "@/redux/features/sidePanel/participantsSlice";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Screen = "lobby" | "video" | "spectating";
+
+export interface Participant {
+  id: string;
+  name: string;
+  avatar: string;
+
+  isReady: boolean;
+  isEliminated: boolean;
+  isConnected: boolean;
+}
 
 interface ServerPlayer {
   id: string;
@@ -608,14 +618,30 @@ function getInitials(name: string): string {
     .join("");
 }
 
+// export function mapServerPlayers(players: ServerPlayer[]): Participant[] {
+//   return players.map((p) => {
+//     const displayName = p.username ?? p.name ?? `Player ${p.id.slice(-4)}`;
+//     return {
+//       id: p.id,
+//       name: displayName,
+//       avatar: getInitials(displayName),
+//       ready: p.ready,
+//       isEliminated: p.isEliminated,
+//       isConnected: p.isConnected,
+//     };
+//   });
+// }
+
 export function mapServerPlayers(players: ServerPlayer[]): Participant[] {
   return players.map((p) => {
     const displayName = p.username ?? p.name ?? `Player ${p.id.slice(-4)}`;
+
     return {
       id: p.id,
       name: displayName,
       avatar: getInitials(displayName),
-      ready: p.isReady,
+
+      isReady: p.isReady,
       isEliminated: p.isEliminated,
       isConnected: p.isConnected,
     };
@@ -746,7 +772,7 @@ function LobbyScreen({
   participants: Participant[];
 }) {
   const router = useRouter();
-  const readyCount = participants.filter((p) => p.ready).length;
+  const readyCount = participants.filter((p) => p.isReady).length;
   const connectedCount = participants.filter(
     (p) => p.isConnected !== false,
   ).length;

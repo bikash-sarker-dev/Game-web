@@ -89,7 +89,7 @@ export default function ParticipantPanel() {
   const participants = useSelector(
     (state: RootState) => state.participants.players,
   );
-  const readyCount = participants.filter((p) => p.ready).length;
+  const readyCount = participants.filter((p) => p.isReady).length;
   console.log(readyCount);
 
   return (
@@ -138,7 +138,7 @@ export default function ParticipantPanel() {
                 <span className="text-red-400/70 text-[12px] font-extrabold uppercase tracking-widest">
                   Out
                 </span>
-              ) : p.ready ? (
+              ) : p.isReady ? (
                 <span className="text-green-400 text-[12px] font-extrabold uppercase tracking-widest">
                   Ready
                 </span>

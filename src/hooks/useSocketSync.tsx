@@ -74,25 +74,11 @@ interface ServerPlayer {
   avatar: string;
   points: number;
   isEliminated: boolean;
-  ready: boolean;
+  isReady: boolean;
   isConnected: boolean;
   hasNetworkIssue: boolean;
   hasSubmitted: boolean;
 }
-
-// function mapServerPlayers(players: ServerPlayer[]): Participant[] {
-//   return players.map((p) => ({
-//     id: p.id,
-//     name: p.name ?? `Player ${p.id.slice(-4)}`,
-//     avatar: p.avatar ?? "", // URL from server, empty string = show initials
-//     isReady: p.ready,
-//     isEliminated: p.isEliminated,
-//     isConnected: p.isConnected,
-//     points: p.points,
-//     hasNetworkIssue: p.hasNetworkIssue,
-//     hasSubmitted: p.hasSubmitted,
-//   }));
-// }
 
 function mapServerPlayers(players: ServerPlayer[]): Participant[] {
   return players.map((p) => ({
@@ -100,12 +86,12 @@ function mapServerPlayers(players: ServerPlayer[]): Participant[] {
     name: p.name ?? `Player ${p.id.slice(-4)}`,
     avatar: p.avatar ?? "",
 
-    ready: p.ready, // ✅ FIXED
+    isReady: p.isReady,
     isEliminated: p.isEliminated,
     isConnected: p.isConnected,
-    hasSubmitted: p.hasSubmitted,
-    hasNetworkIssue: p.hasNetworkIssue,
     points: p.points,
+    hasNetworkIssue: p.hasNetworkIssue,
+    hasSubmitted: p.hasSubmitted,
   }));
 }
 
