@@ -90,7 +90,6 @@ export default function ParticipantPanel() {
     (state: RootState) => state.participants.players,
   );
   const readyCount = participants.filter((p) => p.isReady).length;
-  console.log(readyCount);
 
   return (
     <div className="lg:w-72 rounded-2xl border border-amber-500/30 bg-black/60 backdrop-blur-sm p-5">

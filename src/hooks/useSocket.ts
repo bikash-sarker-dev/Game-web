@@ -11,8 +11,8 @@ const SOCKET_URL = "wss://api-ericjohnson.aiteamtwo.com";
 let globalSocket: Socket | null = null;
 
 export const useSocket = (events?: Record<string, (payload: any) => void>) => {
-  const token = Cookies.get("token");
-  console.log("token", token);
+  const token = Cookies.get("accessToken");
+
   const eventsRef = useRef(events);
   eventsRef.current = events;
 

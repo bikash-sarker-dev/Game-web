@@ -84,7 +84,7 @@ const Navbar = () => {
   const handleLogout = () => {
     setLoggingOut(true);
     setTimeout(() => {
-      Cookies.remove("token"); // removes the token cookie
+      Cookies.remove("accessToken"); // removes the token cookie
       router.push("/login");
       setLoggingOut(false); // redirect after logout
     }, 1000);
