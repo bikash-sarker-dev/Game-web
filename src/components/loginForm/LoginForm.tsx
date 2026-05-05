@@ -52,7 +52,7 @@ const InputField = ({
 
   return (
     <div className="w-full space-y-1">
-      <label htmlFor={id} className="text-sm font-medium text-gray-700">
+      <label htmlFor={id} className="text-sm font-medium text-white">
         {label}
       </label>
 
@@ -139,10 +139,12 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-[500px] bg-white p-8 rounded-2xl shadow-lg">
-        <h1 className="text-3xl font-bold text-center mb-2">Welcome Back</h1>
-        <p className="text-gray-600 text-center mb-8">Sign in to continue</p>
+    <div className=" flex items-center justify-center px-4 bg-[url('/p-bg.png')] bg-cover  bg-no-repeat min-h-screen">
+      <div className="w-full max-w-[500px] bg-[#591012] p-8 rounded-2xl shadow-lg  ">
+        <h1 className="text-3xl font-bold text-center mb-2 text-white">
+          Welcome Back
+        </h1>
+        <p className="text-white text-center mb-8">Sign in to continue</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Email Field */}
@@ -187,7 +189,7 @@ export default function SignInForm() {
     ${
       isLoading
         ? "bg-[#590D13]/70 cursor-not-allowed"
-        : "bg-[#590D13] hover:bg-[#4a0a10] active:scale-[0.985]"
+        : "bg-[#36070c] hover:bg-[#4a0a10] active:scale-[0.985]"
     }`}
           >
             {isLoading && (

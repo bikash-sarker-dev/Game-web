@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 const page = () => {
   return (
-    <div>
+    <div className="">
       <SignInForm />
     </div>
   );
