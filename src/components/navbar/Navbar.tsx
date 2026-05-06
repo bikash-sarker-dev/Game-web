@@ -105,14 +105,14 @@ const Navbar = () => {
           className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl shadow-md cursor-pointer"
         >
           <img
-            src={currentUser.avatar || "https://i.pravatar.cc/100"}
+            src={currentUser?.avatar || "https://i.pravatar.cc/100"}
             alt="user"
             className="w-10 h-10 rounded-full object-cover"
           />
           <div>
             <p className="text-white/70 text-xs">Good Evening</p>
             <p className="text-white font-semibold text-sm">
-              {currentUser.name}
+              {currentUser?.name}
             </p>
           </div>
         </div>
