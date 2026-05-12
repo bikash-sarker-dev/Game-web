@@ -123,12 +123,7 @@ export default function SignInForm() {
       // ✅ Cookie name matches middleware "accessToken"
       const isProduction = window.location.protocol === "https:";
 
-      Cookies.set("accessToken", response.token, {
-        expires: 7,
-        secure: isProduction,
-        sameSite: "lax",
-        path: "/", // ✅ important — available on all routes
-      });
+      Cookies.set("accessToken", response.token);
 
       toast.success("Login successful! Welcome back.");
       router.push("/");
