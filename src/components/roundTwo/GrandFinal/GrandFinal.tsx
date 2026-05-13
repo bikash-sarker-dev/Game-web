@@ -2052,6 +2052,7 @@ import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import Button from "@/components/share/ButtonPrimary";
 import { RootState } from "@/redux/store";
 import { GameWinner, setGameOver } from "@/redux/features/winner/Gameoverslice";
+import { VideoCallModal } from "./HostVideoCall";
 
 // ─── ZegoCloud Credentials ────────────────────────────────────────────────────
 const ZEGO_APP_ID = 1697884864;
@@ -2150,281 +2151,281 @@ function ZegoRoom({
 }
 
 // ─── Video Call Modal ─────────────────────────────────────────────────────────
-function VideoCallModal({
-  player,
-  index,
-  onClose,
-  sendEvent,
-  callAccepted,
-  callRejected,
-  hostUserId,
-  hostUserName,
-}: {
-  player: Player;
-  index: number;
-  onClose: () => void;
-  sendEvent: (event: string, payload: unknown) => void;
-  callAccepted: boolean;
-  callRejected: boolean;
-  hostUserId: string;
-  hostUserName: string;
-}) {
-  const [status, setStatus] = useState<CallStatus>("calling");
-  const [showBanner, setShowBanner] = useState(false);
-  const statusRef = useRef<CallStatus>("calling");
+// function VideoCallModal({
+//   player,
+//   index,
+//   onClose,
+//   sendEvent,
+//   callAccepted,
+//   callRejected,
+//   hostUserId,
+//   hostUserName,
+// }: {
+//   player: Player;
+//   index: number;
+//   onClose: () => void;
+//   sendEvent: (event: string, payload: unknown) => void;
+//   callAccepted: boolean;
+//   callRejected: boolean;
+//   hostUserId: string;
+//   hostUserName: string;
+// }) {
+//   const [status, setStatus] = useState<CallStatus>("calling");
+//   const [showBanner, setShowBanner] = useState(false);
+//   const statusRef = useRef<CallStatus>("calling");
 
-  const set = (s: CallStatus) => {
-    statusRef.current = s;
-    setStatus(s);
-  };
+//   const set = (s: CallStatus) => {
+//     statusRef.current = s;
+//     setStatus(s);
+//   };
 
-  const callRoomId = `${player.id}${GAME_ID}`;
-  const displayName = player.name ?? `Player ${index + 1}`;
-  const avatar = AVATAR_POOL[index % AVATAR_POOL.length];
-  const bgColor = BG_COLORS[index % BG_COLORS.length];
+//   const callRoomId = `${player.id}${GAME_ID}`;
+//   const displayName = player.name ?? `Player ${index + 1}`;
+//   const avatar = AVATAR_POOL[index % AVATAR_POOL.length];
+//   const bgColor = BG_COLORS[index % BG_COLORS.length];
 
-  useEffect(() => {
-    sendEvent("GAME_EVENT", {
-      gameId: GAME_ID,
-      type: "CALL_PLAYER",
-      payload: { userId: player.id },
-    });
-  }, []);
+//   useEffect(() => {
+//     sendEvent("GAME_EVENT", {
+//       gameId: GAME_ID,
+//       type: "CALL_PLAYER",
+//       payload: { userId: player.id },
+//     });
+//   }, []);
 
-  useEffect(() => {
-    if (!callAccepted) return;
-    if (statusRef.current !== "calling" && statusRef.current !== "accepted")
-      return;
-    set("accepted");
-    setShowBanner(true);
-    const t = setTimeout(() => {
-      if (statusRef.current === "accepted") {
-        setShowBanner(false);
-        set("connected");
-      }
-    }, 2200);
-    return () => clearTimeout(t);
-  }, [callAccepted]);
+//   useEffect(() => {
+//     if (!callAccepted) return;
+//     if (statusRef.current !== "calling" && statusRef.current !== "accepted")
+//       return;
+//     set("accepted");
+//     setShowBanner(true);
+//     const t = setTimeout(() => {
+//       if (statusRef.current === "accepted") {
+//         setShowBanner(false);
+//         set("connected");
+//       }
+//     }, 2200);
+//     return () => clearTimeout(t);
+//   }, [callAccepted]);
 
-  useEffect(() => {
-    if (!callRejected) return;
-    if (statusRef.current !== "calling") return;
-    sendEvent("GAME_EVENT", {
-      gameId: GAME_ID,
-      type: "END_CALL",
-      payload: { userId: player.id, reason: "rejected" },
-    });
-    set("rejected");
-    const t = setTimeout(onClose, 2500);
-    return () => clearTimeout(t);
-  }, [callRejected]);
+//   useEffect(() => {
+//     if (!callRejected) return;
+//     if (statusRef.current !== "calling") return;
+//     sendEvent("GAME_EVENT", {
+//       gameId: GAME_ID,
+//       type: "END_CALL",
+//       payload: { userId: player.id, reason: "rejected" },
+//     });
+//     set("rejected");
+//     const t = setTimeout(onClose, 2500);
+//     return () => clearTimeout(t);
+//   }, [callRejected]);
 
-  const handleCancel = () => {
-    if (statusRef.current !== "calling") return;
-    sendEvent("GAME_EVENT", {
-      gameId: GAME_ID,
-      type: "END_CALL",
-      payload: { userId: player.id, reason: "cancelled" },
-    });
-    set("cancelled");
-    setTimeout(onClose, 1400);
-  };
+//   const handleCancel = () => {
+//     if (statusRef.current !== "calling") return;
+//     sendEvent("GAME_EVENT", {
+//       gameId: GAME_ID,
+//       type: "END_CALL",
+//       payload: { userId: player.id, reason: "cancelled" },
+//     });
+//     set("cancelled");
+//     setTimeout(onClose, 1400);
+//   };
 
-  const handleZegoLeave = useCallback(() => {
-    sendEvent("GAME_EVENT", {
-      gameId: GAME_ID,
-      type: "END_CALL",
-      payload: { userId: player.id, reason: "completed" },
-    });
-    set("ended");
-    setTimeout(onClose, 800);
-  }, [player.id]);
+//   const handleZegoLeave = useCallback(() => {
+//     sendEvent("GAME_EVENT", {
+//       gameId: GAME_ID,
+//       type: "END_CALL",
+//       payload: { userId: player.id, reason: "completed" },
+//     });
+//     set("ended");
+//     setTimeout(onClose, 800);
+//   }, [player.id]);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div
-        className="relative w-full max-w-3xl rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_120px_rgba(0,0,0,0.95)] bg-neutral-950 flex flex-col"
-        style={{ minHeight: 520 }}
-      >
-        {status === "calling" && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-5">
-            <div
-              className="absolute inset-0 opacity-20"
-              style={{
-                background: `radial-gradient(ellipse at 50% 40%, ${bgColor}cc, transparent 65%)`,
-              }}
-            />
-            <div className="relative z-10 flex items-center justify-center">
-              {[140, 185, 230].map((s, i) => (
-                <span
-                  key={s}
-                  className="absolute rounded-full border border-white/10 animate-ping"
-                  style={{
-                    width: s,
-                    height: s,
-                    animationDuration: `${1.4 + i * 0.6}s`,
-                    animationDelay: `${i * 0.18}s`,
-                  }}
-                />
-              ))}
-              <img
-                src={avatar}
-                alt="Calling"
-                className="w-28 h-28 rounded-full object-cover object-top border-2 border-white/20 relative z-10 shadow-2xl"
-                style={{ backgroundColor: bgColor }}
-              />
-            </div>
-            <div className="z-10 text-center space-y-1.5">
-              <p className="text-white/35 text-[10px] tracking-[0.45em] uppercase font-mono">
-                Ringing…
-              </p>
-              <p className="text-white font-black text-xl tracking-widest uppercase">
-                {displayName}
-              </p>
-              <p className="text-white/25 font-mono text-[10px] break-all max-w-[260px] mx-auto">
-                {player.id}
-              </p>
-              <div className="flex items-center justify-center gap-1.5 pt-1">
-                {[0, 180, 360].map((d) => (
-                  <span
-                    key={d}
-                    className="w-1.5 h-1.5 bg-white/35 rounded-full animate-bounce"
-                    style={{ animationDelay: `${d}ms` }}
-                  />
-                ))}
-              </div>
-            </div>
-            <button
-              onClick={handleCancel}
-              className="z-10 w-16 h-16 rounded-full bg-red-600 hover:bg-red-500 active:scale-90 transition-all flex items-center justify-center text-2xl shadow-[0_0_40px_rgba(220,38,38,0.5)] cursor-pointer select-none"
-            >
-              📵
-            </button>
-            <p className="z-10 -mt-3 text-white/25 text-[10px] tracking-widest uppercase font-mono">
-              Cancel
-            </p>
-          </div>
-        )}
+//   return (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+//       <div
+//         className="relative w-full max-w-3xl rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_120px_rgba(0,0,0,0.95)] bg-neutral-950 flex flex-col"
+//         style={{ minHeight: 520 }}
+//       >
+//         {status === "calling" && (
+//           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-5">
+//             <div
+//               className="absolute inset-0 opacity-20"
+//               style={{
+//                 background: `radial-gradient(ellipse at 50% 40%, ${bgColor}cc, transparent 65%)`,
+//               }}
+//             />
+//             <div className="relative z-10 flex items-center justify-center">
+//               {[140, 185, 230].map((s, i) => (
+//                 <span
+//                   key={s}
+//                   className="absolute rounded-full border border-white/10 animate-ping"
+//                   style={{
+//                     width: s,
+//                     height: s,
+//                     animationDuration: `${1.4 + i * 0.6}s`,
+//                     animationDelay: `${i * 0.18}s`,
+//                   }}
+//                 />
+//               ))}
+//               <img
+//                 src={avatar}
+//                 alt="Calling"
+//                 className="w-28 h-28 rounded-full object-cover object-top border-2 border-white/20 relative z-10 shadow-2xl"
+//                 style={{ backgroundColor: bgColor }}
+//               />
+//             </div>
+//             <div className="z-10 text-center space-y-1.5">
+//               <p className="text-white/35 text-[10px] tracking-[0.45em] uppercase font-mono">
+//                 Ringing…
+//               </p>
+//               <p className="text-white font-black text-xl tracking-widest uppercase">
+//                 {displayName}
+//               </p>
+//               <p className="text-white/25 font-mono text-[10px] break-all max-w-[260px] mx-auto">
+//                 {player.id}
+//               </p>
+//               <div className="flex items-center justify-center gap-1.5 pt-1">
+//                 {[0, 180, 360].map((d) => (
+//                   <span
+//                     key={d}
+//                     className="w-1.5 h-1.5 bg-white/35 rounded-full animate-bounce"
+//                     style={{ animationDelay: `${d}ms` }}
+//                   />
+//                 ))}
+//               </div>
+//             </div>
+//             <button
+//               onClick={handleCancel}
+//               className="z-10 w-16 h-16 rounded-full bg-red-600 hover:bg-red-500 active:scale-90 transition-all flex items-center justify-center text-2xl shadow-[0_0_40px_rgba(220,38,38,0.5)] cursor-pointer select-none"
+//             >
+//               📵
+//             </button>
+//             <p className="z-10 -mt-3 text-white/25 text-[10px] tracking-widest uppercase font-mono">
+//               Cancel
+//             </p>
+//           </div>
+//         )}
 
-        {status === "cancelled" && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/95">
-            <div className="text-6xl">🚫</div>
-            <p className="text-white font-black text-xl tracking-widest uppercase">
-              Call Cancelled
-            </p>
-            <p className="text-white/40 text-xs font-mono">
-              You hung up before they answered
-            </p>
-          </div>
-        )}
+//         {status === "cancelled" && (
+//           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/95">
+//             <div className="text-6xl">🚫</div>
+//             <p className="text-white font-black text-xl tracking-widest uppercase">
+//               Call Cancelled
+//             </p>
+//             <p className="text-white/40 text-xs font-mono">
+//               You hung up before they answered
+//             </p>
+//           </div>
+//         )}
 
-        {status === "rejected" && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-black/90 backdrop-blur-sm">
-            <div className="relative flex items-center justify-center">
-              {[140, 185].map((s, i) => (
-                <span
-                  key={s}
-                  className="absolute rounded-full border border-red-500/20 animate-ping"
-                  style={{
-                    width: s,
-                    height: s,
-                    animationDuration: `${1.2 + i * 0.6}s`,
-                  }}
-                />
-              ))}
-              <img
-                src={avatar}
-                alt={displayName}
-                className="w-24 h-24 rounded-full object-cover object-top border-4 border-red-500/40 relative z-10 opacity-40 grayscale"
-                style={{ backgroundColor: bgColor }}
-              />
-              <span className="absolute -bottom-1 -right-1 z-20 w-8 h-8 rounded-full bg-red-600 border-2 border-black flex items-center justify-center text-sm">
-                ✕
-              </span>
-            </div>
-            <div className="text-center space-y-1">
-              <p className="text-red-400 font-black text-sm tracking-[0.4em] uppercase animate-pulse">
-                Call Declined
-              </p>
-              <p className="text-white font-black text-lg tracking-widest uppercase">
-                {displayName}
-              </p>
-              <p className="text-white/35 text-sm font-mono">
-                is not available right now
-              </p>
-            </div>
-          </div>
-        )}
+//         {status === "rejected" && (
+//           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-black/90 backdrop-blur-sm">
+//             <div className="relative flex items-center justify-center">
+//               {[140, 185].map((s, i) => (
+//                 <span
+//                   key={s}
+//                   className="absolute rounded-full border border-red-500/20 animate-ping"
+//                   style={{
+//                     width: s,
+//                     height: s,
+//                     animationDuration: `${1.2 + i * 0.6}s`,
+//                   }}
+//                 />
+//               ))}
+//               <img
+//                 src={avatar}
+//                 alt={displayName}
+//                 className="w-24 h-24 rounded-full object-cover object-top border-4 border-red-500/40 relative z-10 opacity-40 grayscale"
+//                 style={{ backgroundColor: bgColor }}
+//               />
+//               <span className="absolute -bottom-1 -right-1 z-20 w-8 h-8 rounded-full bg-red-600 border-2 border-black flex items-center justify-center text-sm">
+//                 ✕
+//               </span>
+//             </div>
+//             <div className="text-center space-y-1">
+//               <p className="text-red-400 font-black text-sm tracking-[0.4em] uppercase animate-pulse">
+//                 Call Declined
+//               </p>
+//               <p className="text-white font-black text-lg tracking-widest uppercase">
+//                 {displayName}
+//               </p>
+//               <p className="text-white/35 text-sm font-mono">
+//                 is not available right now
+//               </p>
+//             </div>
+//           </div>
+//         )}
 
-        {status === "accepted" && showBanner && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-5 bg-black/55 backdrop-blur-sm">
-            <div className="relative flex items-center justify-center">
-              {[140, 185].map((s, i) => (
-                <span
-                  key={s}
-                  className="absolute rounded-full border border-green-400/30 animate-ping"
-                  style={{
-                    width: s,
-                    height: s,
-                    animationDuration: `${1 + i * 0.5}s`,
-                  }}
-                />
-              ))}
-              <img
-                src={avatar}
-                alt={displayName}
-                className="w-28 h-28 rounded-full object-cover object-top border-4 border-green-400/60 relative z-10 shadow-[0_0_50px_rgba(74,222,128,0.45)]"
-                style={{ backgroundColor: bgColor }}
-              />
-              <span className="absolute -bottom-1 -right-1 z-20 w-9 h-9 rounded-full bg-green-500 border-2 border-black flex items-center justify-center shadow-lg">
-                ✓
-              </span>
-            </div>
-            <div className="text-center space-y-1">
-              <p className="text-green-400 font-black text-sm tracking-[0.4em] uppercase animate-pulse">
-                Call Accepted
-              </p>
-              <p className="text-white font-black text-lg tracking-widest uppercase">
-                {displayName}
-              </p>
-              <p className="text-white/35 font-mono text-xs">
-                Connecting video…
-              </p>
-            </div>
-            <div className="w-56 h-1 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-green-500 to-green-300 rounded-full"
-                style={{ animation: "grow 2.2s ease-out forwards" }}
-              />
-            </div>
-          </div>
-        )}
+//         {status === "accepted" && showBanner && (
+//           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-5 bg-black/55 backdrop-blur-sm">
+//             <div className="relative flex items-center justify-center">
+//               {[140, 185].map((s, i) => (
+//                 <span
+//                   key={s}
+//                   className="absolute rounded-full border border-green-400/30 animate-ping"
+//                   style={{
+//                     width: s,
+//                     height: s,
+//                     animationDuration: `${1 + i * 0.5}s`,
+//                   }}
+//                 />
+//               ))}
+//               <img
+//                 src={avatar}
+//                 alt={displayName}
+//                 className="w-28 h-28 rounded-full object-cover object-top border-4 border-green-400/60 relative z-10 shadow-[0_0_50px_rgba(74,222,128,0.45)]"
+//                 style={{ backgroundColor: bgColor }}
+//               />
+//               <span className="absolute -bottom-1 -right-1 z-20 w-9 h-9 rounded-full bg-green-500 border-2 border-black flex items-center justify-center shadow-lg">
+//                 ✓
+//               </span>
+//             </div>
+//             <div className="text-center space-y-1">
+//               <p className="text-green-400 font-black text-sm tracking-[0.4em] uppercase animate-pulse">
+//                 Call Accepted
+//               </p>
+//               <p className="text-white font-black text-lg tracking-widest uppercase">
+//                 {displayName}
+//               </p>
+//               <p className="text-white/35 font-mono text-xs">
+//                 Connecting video…
+//               </p>
+//             </div>
+//             <div className="w-56 h-1 bg-white/10 rounded-full overflow-hidden">
+//               <div
+//                 className="h-full bg-gradient-to-r from-green-500 to-green-300 rounded-full"
+//                 style={{ animation: "grow 2.2s ease-out forwards" }}
+//               />
+//             </div>
+//           </div>
+//         )}
 
-        {status === "connected" && (
-          <div className="w-full h-full" style={{ minHeight: 520 }}>
-            <ZegoRoom
-              roomId={callRoomId}
-              userId={hostUserId}
-              userName={hostUserName}
-              onLeave={handleZegoLeave}
-            />
-          </div>
-        )}
+//         {status === "connected" && (
+//           <div className="w-full h-full" style={{ minHeight: 520 }}>
+//             <ZegoRoom
+//               roomId={callRoomId}
+//               userId={hostUserId}
+//               userName={hostUserName}
+//               onLeave={handleZegoLeave}
+//             />
+//           </div>
+//         )}
 
-        {status === "ended" && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/95">
-            <div className="text-6xl">📵</div>
-            <p className="text-white font-black text-xl tracking-widest uppercase">
-              Call Ended
-            </p>
-          </div>
-        )}
+//         {status === "ended" && (
+//           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/95">
+//             <div className="text-6xl">📵</div>
+//             <p className="text-white font-black text-xl tracking-widest uppercase">
+//               Call Ended
+//             </p>
+//           </div>
+//         )}
 
-        <style>{`@keyframes grow { from{width:0%} to{width:100%} }`}</style>
-      </div>
-    </div>
-  );
-}
+//         <style>{`@keyframes grow { from{width:0%} to{width:100%} }`}</style>
+//       </div>
+//     </div>
+//   );
+// }
 
 // ─── PlayerCard ───────────────────────────────────────────────────────────────
 function PlayerCard({
