@@ -57,13 +57,15 @@ import { useState, useRef, useEffect } from "react";
 import Button from "../share/ButtonPrimary";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "@/redux/features/user/userSlice";
 
 const Navbar = () => {
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
 
   const currentUser = useSelector((state: any) => state.user.user);
 
@@ -86,7 +88,8 @@ const Navbar = () => {
     setTimeout(() => {
       Cookies.remove("accessToken"); // removes the token cookie
       router.push("/login");
-      setLoggingOut(false); // redirect after logout
+      setLoggingOut(false);
+      dispatch(logout());
     }, 1000);
   };
 
