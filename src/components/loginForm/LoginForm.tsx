@@ -125,7 +125,6 @@ export default function SignInForm() {
       toast.success("Login successful! Welcome back.");
       router.push("/");
     } catch (error: any) {
-      console.error("Login Error:", error);
       toast.error(error?.data?.message || "Invalid email or password");
     }
   };

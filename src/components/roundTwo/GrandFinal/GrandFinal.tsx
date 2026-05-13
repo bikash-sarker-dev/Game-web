@@ -1873,7 +1873,8 @@ export default function GrandFinale() {
           console.log("✅ ELIMINATE ACK:", response);
 
           if (response?.success) {
-            router.replace("/round-two/round-two-six");
+            router.push("/round-two/round-two-six");
+            router.refresh();
           } else {
             console.warn("❌ Eliminate failed:", response);
           }

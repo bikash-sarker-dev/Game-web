@@ -6,7 +6,7 @@ import { io, Socket } from "socket.io-client";
 import Cookies from "js-cookie";
 
 // const SOCKET_URL = "http://164.92.85.75:5040";
-const SOCKET_URL = "wss://api-ericjohnson.aiteamtwo.com";
+const SOCKET_URL = "wss://api.internetbachelor.com";
 
 let globalSocket: Socket | null = null;
 
