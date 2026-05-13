@@ -27,8 +27,12 @@ const participantsSlice = createSlice({
     setPlayers(state, action: PayloadAction<Participant[]>) {
       state.players = action.payload;
     },
+
+    clearPlayers(state) {
+      state.players = [];
+    },
   },
 });
 
-export const { setPlayers } = participantsSlice.actions;
+export const { setPlayers, clearPlayers } = participantsSlice.actions;
 export default participantsSlice.reducer;

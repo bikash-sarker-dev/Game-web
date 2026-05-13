@@ -877,9 +877,10 @@
 
 "use client";
 
+import { resetGameOver } from "@/redux/features/winner/Gameoverslice";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 // ─── Scoped style injection ───────────────────────────────────────────────────
 const STYLE_ID = "__game-over-screen-kf__";
@@ -1529,6 +1530,7 @@ function PointsCard({ points, ready }: { points: number; ready: boolean }) {
 function GameOverInner({ onPlayAgain }: { onPlayAgain?: () => void }) {
   const router = useRouter();
   const [ready, setReady] = useState(false);
+  const dispatch = useDispatch();
 
   // ── Only source of truth: Redux ───────────────────────────────────────────
   const winner = useSelector((state: any) => state.gameOver.winner);
@@ -1542,8 +1544,10 @@ function GameOverInner({ onPlayAgain }: { onPlayAgain?: () => void }) {
   const handlePlayAgain = () => {
     if (onPlayAgain) {
       onPlayAgain();
+      dispatch(resetGameOver());
     } else {
       router.push("/");
+      dispatch(resetGameOver());
     }
   };
 
