@@ -8,10 +8,10 @@ export const getMe = baseApi.injectEndpoints({
       providesTags: ["User"],
     }),
 
-    profileUpdateAvatar: builder.mutation({
+    fileUploading: builder.mutation({
       query: (payload) => ({
-        url: "/users/profile/avatar",
-        method: "PUT",
+        url: "/file-upload",
+        method: "POST",
         body: payload,
       }),
       invalidatesTags: ["User"],
@@ -36,8 +36,7 @@ export const getMe = baseApi.injectEndpoints({
 });
 
 export const {
-  useGetMeProfileQuery,
+  useFileUploadingMutation,
   useZegoCloudQuery,
-  useProfileUpdateAvatarMutation,
   useChangePasswordMutation,
 } = getMe;
