@@ -2397,7 +2397,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import Button from "@/components/share/ButtonPrimary";
-import { RootState } from "@/redux/store";
+
 import { GameWinner, setGameOver } from "@/redux/features/winner/Gameoverslice";
 import { VideoCallModal } from "./HostVideoCall";
 
@@ -2409,6 +2409,7 @@ const ZEGO_SERVER_SECRET = "9ad294853be97ac5458a620f1b2c85a1";
 interface Player {
   id: string;
   name?: string;
+  avatar?: string;
   socketId: string;
   isEliminated: boolean;
   isReady: boolean;
@@ -2489,7 +2490,8 @@ function PlayerCard({
       {/* Avatar */}
       <div className="relative w-full aspect-square overflow-hidden px-4">
         <img
-          src={AVATAR_POOL[index % AVATAR_POOL.length]}
+          // src={AVATAR_POOL[index % AVATAR_POOL.length]}
+          src={player.avatar}
           alt={name}
           className="w-full h-full object-cover object-top rounded-xl transition-transform duration-700 hover:scale-105"
           style={{ backgroundColor: BG_COLORS[index % BG_COLORS.length] }}
