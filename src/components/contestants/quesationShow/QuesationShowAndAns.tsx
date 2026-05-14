@@ -1318,7 +1318,7 @@
 "use client";
 
 import Button from "@/components/share/ButtonPrimary";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Check,
@@ -1327,6 +1327,7 @@ import {
   Phone,
   Image as ImageIcon,
   Wifi,
+  WifiOff,
 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { useSocket } from "@/hooks/useSocket";
@@ -1334,12 +1335,6 @@ import VideoCallRound from "./Videocallround";
 import { GameWinner, setGameOver } from "@/redux/features/winner/Gameoverslice";
 import { useFileUploadingMutation } from "@/redux/api/getMe/getMeApi";
 import SnapEditor from "@/components/snapEdit/Snapedit";
-
-// ── SnapEditor import (adjust path to where you placed the file) ──────────
-
-// ── Your RTK Query / mutation hook for file uploads ───────────────────────
-// This hook must return { mutate/trigger, isLoading, data, error }
-// Adjust the import path to match your actual API slice.
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface ServerPlayer {
@@ -1366,7 +1361,7 @@ type LocalPhase =
   | "ELEMENT"
   | "ELIMINATED";
 
-/* ─── Tiny animated dot row ─────────────────────────────────────────────── */
+/* ─── Animated dot row ───────────────────────────────────────────────────── */
 function PulseDots({ count = 3 }: { count?: number }) {
   return (
     <div className="flex items-center gap-1.5">
@@ -1432,6 +1427,7 @@ function WaitingCard({
   );
 }
 
+/* ─── Element spectator screen ───────────────────────────────────────────── */
 function ElementSpectator({ username }: { username?: string }) {
   return (
     <div className="relative flex flex-col items-center gap-8 py-6 w-full overflow-hidden">
@@ -1516,6 +1512,7 @@ function ElementSpectator({ username }: { username?: string }) {
   );
 }
 
+/* ─── Eliminated screen ──────────────────────────────────────────────────── */
 function EliminatedScreen() {
   const router = useRouter();
   return (
@@ -1541,6 +1538,7 @@ function EliminatedScreen() {
   );
 }
 
+/* ─── Lobby screen ───────────────────────────────────────────────────────── */
 function LobbyScreen({
   charIdx,
   lobbyText,
@@ -1575,6 +1573,7 @@ function LobbyScreen({
   );
 }
 
+/* ─── Waiting screens ────────────────────────────────────────────────────── */
 function ReadyWaitingScreen() {
   return (
     <WaitingCard
@@ -1585,6 +1584,7 @@ function ReadyWaitingScreen() {
     />
   );
 }
+
 function AnswerWaitingScreen() {
   return (
     <WaitingCard
@@ -1595,6 +1595,7 @@ function AnswerWaitingScreen() {
     />
   );
 }
+
 function ImageWaitingScreen() {
   return (
     <WaitingCard
@@ -1606,11 +1607,13 @@ function ImageWaitingScreen() {
   );
 }
 
+/* ─── Player avatar ──────────────────────────────────────────────────────── */
 function Avatar({ player, index }: { player: ServerPlayer; index: number }) {
   const isEl = player.isElement === true;
   const isElim = player.isEliminated;
   return (
     <div
+      title={player.username ?? player.name ?? `Player ${index + 1}`}
       className={`relative w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-500 ${
         isEl
           ? "bg-gradient-to-br from-amber-400 to-rose-500 border-amber-300 text-black scale-110 shadow-2xl shadow-amber-500/50"
@@ -1642,14 +1645,16 @@ function Avatar({ player, index }: { player: ServerPlayer; index: number }) {
 /* ════════════════════════════════════════════════════════════════════════════
    Main Component
 ══════════════════════════════════════════════════════════════════════════════ */
+const GAME_ID = "internet-bachelor-123";
+const LOBBY_TEXT = '"CONNECTED TO LOBBY"';
+
 function QuesationShowAndAns() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const lobbyText = '"CONNECTED TO LOBBY"';
 
+  /* ── State ───────────────────────────────────────────────────────────── */
   const [charIdx, setCharIdx] = useState(0);
   const [localPhase, setLocalPhase] = useState<LocalPhase>("LOBBY");
-  const [gamePhase, setGamePhase] = useState("");
   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -1659,27 +1664,24 @@ function QuesationShowAndAns() {
   const [callKey, setCallKey] = useState(0);
   const [callEndedKey, setCallEndedKey] = useState(0);
 
+  /* ── Redux ───────────────────────────────────────────────────────────── */
   const currentUser = useSelector((state: any) => state.user.user);
   const participants: ServerPlayer[] = useSelector(
     (state: any) => state.participants?.players ?? [],
   );
+
   const currentPlayer = participants.find((p) => p.id === currentUser?.id);
   const isElement = currentPlayer?.isElement === true;
   const isEliminated = currentPlayer?.isEliminated === true;
 
+  /* ── Refs ────────────────────────────────────────────────────────────── */
+  // Keep a ref so socket callbacks always see the latest eliminated status
   const isEliminatedRef = useRef(false);
   useEffect(() => {
     isEliminatedRef.current = isEliminated;
   }, [isEliminated]);
 
-  /* ── File upload mutation ────────────────────────────────────────────────
-   *
-   * useFileUploadingMutation() is assumed to be an RTK Query mutation that:
-   *   - Accepts FormData
-   *   - Returns { data: { url: string }, isLoading, isError, error }
-   *
-   * Adjust destructuring below to match your actual hook's return shape.
-   */
+  /* ── File upload mutation ────────────────────────────────────────────── */
   const [
     uploadFile,
     {
@@ -1690,63 +1692,69 @@ function QuesationShowAndAns() {
     },
   ] = useFileUploadingMutation();
 
-  /**
-   * Called by SnapEditor with the final composited PNG Blob.
-   * 1. Upload to your file server via useFileUploadingMutation
-   * 2. On success grab the URL from the response
-   * 3. Send it to the socket as SUBMIT_DATA so the host/server gets it
-   * 4. Transition to IMAGE_WAITING
-   */
-  const handleImageSubmit = async (blob: Blob) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", blob, `snap-${Date.now()}.png`);
-      // Add any extra fields your API needs, e.g.:
-      // formData.append("gameId", "internet-bachelor-123");
-
-      const result = await uploadFile(formData).unwrap();
-
-      // ── Adjust the field name to match your API response ──
-      // Common shapes: result.url | result.imageUrl | result.data.url | result.path
-      const imageUrl: string =
-        result?.url ??
-        result?.imageUrl ??
-        result?.data?.url ??
-        result?.path ??
-        "";
-
-      if (!imageUrl) throw new Error("No URL returned from upload API");
-
-      // ── Send the image URL to the socket ────────────────────────────
-      sendEvent(
-        "GAME_EVENT",
-        {
-          gameId: "internet-bachelor-123",
-          type: "SUBMIT_DATA",
-          payload: { data: { imageUrl } },
-        },
-        (response: any) => {
-          if (response?.success === true) {
-            safeSetPhase("IMAGE_WAITING");
-          }
-        },
-      );
-    } catch (err) {
-      // uploadError is surfaced to SnapEditor via the isImageUploadError / imageUploadErrorData props
-      console.error("Image upload failed:", err);
-    }
-  };
-
-  const safeSetPhase = (phase: LocalPhase) => {
+  /* ── Helpers ─────────────────────────────────────────────────────────── */
+  const safeSetPhase = useCallback((phase: LocalPhase) => {
     if (isEliminatedRef.current && phase !== "ELIMINATED") return;
     setLocalPhase(phase);
+  }, []);
+
+  const handleGameEnded = useCallback(
+    (winner: GameWinner) => {
+      dispatch(setGameOver(winner));
+      router.push("/round-two/round-two-six");
+    },
+    [dispatch, router],
+  );
+
+  /**
+   * Extract URL from API response.
+   * Your server returns: { success: true, message: "...", data: "https://..." }
+   * `data` is the URL string directly — not an object.
+   */
+  const extractImageUrl = (result: any): string => {
+    if (typeof result?.data === "string" && result.data.startsWith("http")) {
+      return result.data;
+    }
+    // Fallback shapes for other possible API responses
+    return (
+      result?.url ?? result?.imageUrl ?? result?.data?.url ?? result?.path ?? ""
+    );
   };
 
-  const handleGameEnded = (winner: GameWinner) => {
-    dispatch(setGameOver(winner));
-    router.push("/round-two/round-two-six");
-  };
+  /* ── Image submit: upload then socket ────────────────────────────────── */
+  const handleImageSubmit = useCallback(
+    async (blob: Blob) => {
+      try {
+        const formData = new FormData();
+        formData.append("file", blob, `snap-${Date.now()}.png`);
 
+        const result = await uploadFile(formData).unwrap();
+        const imageUrl = extractImageUrl(result);
+
+        if (!imageUrl) throw new Error("No URL returned from upload API");
+
+        sendEvent(
+          "GAME_EVENT",
+          {
+            gameId: GAME_ID,
+            type: "SUBMIT_DATA",
+            payload: { data: { imageUrl } },
+          },
+          (response: any) => {
+            if (response?.success === true) {
+              safeSetPhase("IMAGE_WAITING");
+            }
+          },
+        );
+      } catch (err) {
+        console.error("Image upload failed:", err);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [uploadFile, safeSetPhase],
+  );
+
+  /* ── Socket ──────────────────────────────────────────────────────────── */
   const { sendEvent, isConnected } = useSocket({
     GAME_EVENT: (payload: any) => {
       console.log("🎮 Game Event received:", payload);
@@ -1757,10 +1765,13 @@ function QuesationShowAndAns() {
         return;
       }
 
+      // Only process non-update events if not eliminated
       if (isEliminatedRef.current && payload.type !== "PLAYERS_UPDATE") return;
 
       if (payload.type === "PLAYERS_UPDATE" && Array.isArray(payload.payload)) {
         const newParticipants = payload.payload as ServerPlayer[];
+
+        // Check if current user just became an Element
         const isNowElement = newParticipants.some(
           (p) => p.id === currentUser?.id && p.isElement === true,
         );
@@ -1770,6 +1781,8 @@ function QuesationShowAndAns() {
           setTimeout(() => setShowElementAnimation(false), 4200);
         }
         setPreviousElementStatus(isNowElement);
+
+        // Check if current user is now eliminated
         const nowEliminated = newParticipants.some(
           (p) => p.id === currentUser?.id && p.isEliminated === true,
         );
@@ -1784,27 +1797,31 @@ function QuesationShowAndAns() {
         setAnswer("");
         safeSetPhase("QUESTION");
       }
+
       if (payload.type === "ROUND_STARTED") {
-        setGamePhase(payload.payload.type);
         setIncomingHostId(null);
         setCallKey(0);
         setCallEndedKey(0);
         if (payload.payload.type === "IMAGE") safeSetPhase("IMAGE_UPLOAD");
         if (payload.payload.type === "VIDEO") safeSetPhase("VIDEO");
       }
+
       if (payload.type === "INCOMING_CALL") {
         setIncomingHostId(payload.payload.hostId);
         setCallKey((p) => p + 1);
         safeSetPhase("VIDEO");
       }
+
       if (payload.type === "CALL_ENDED") {
         setIncomingHostId(null);
         setCallEndedKey((p) => p + 1);
       }
     },
 
-    ROSE_GIVEN: (payload) => console.log("🌹 Rose given to:", payload.player),
-    PLAYER_ELIMINATED: (payload) => {
+    ROSE_GIVEN: (payload: any) =>
+      console.log("🌹 Rose given to:", payload.player),
+
+    PLAYER_ELIMINATED: (payload: any) => {
       if (
         payload.player?.id === currentUser?.id ||
         payload.playerId === currentUser?.id
@@ -1813,6 +1830,7 @@ function QuesationShowAndAns() {
         setLocalPhase("ELIMINATED");
       }
     },
+
     GAME_ENDED: (payload: any) => {
       const winner: GameWinner | undefined =
         payload?.winner ?? payload?.payload?.winner;
@@ -1820,13 +1838,16 @@ function QuesationShowAndAns() {
     },
   });
 
+  /* ── Effects ─────────────────────────────────────────────────────────── */
+  // Lobby typewriter animation
   useEffect(() => {
-    if (localPhase === "LOBBY" && charIdx < lobbyText.length) {
-      const t = setTimeout(() => setCharIdx((c) => c + 1), 40);
-      return () => clearTimeout(t);
-    }
-  }, [charIdx, lobbyText.length, localPhase]);
+    if (localPhase !== "LOBBY") return;
+    if (charIdx >= LOBBY_TEXT.length) return;
+    const t = setTimeout(() => setCharIdx((c) => c + 1), 40);
+    return () => clearTimeout(t);
+  }, [charIdx, localPhase]);
 
+  // Sync elimination / element status from redux
   useEffect(() => {
     if (isEliminated) {
       isEliminatedRef.current = true;
@@ -1838,26 +1859,28 @@ function QuesationShowAndAns() {
     ) {
       safeSetPhase("ELEMENT");
     }
-  }, [isElement, isEliminated]);
+  }, [isElement, isEliminated, localPhase, safeSetPhase]);
 
+  /* ── Action handlers ─────────────────────────────────────────────────── */
   const handleReady = () => {
     sendEvent(
       "GAME_EVENT",
-      { gameId: "internet-bachelor-123", type: "PLAYER_READY", payload: {} },
+      { gameId: GAME_ID, type: "PLAYER_READY", payload: {} },
       (response: any) => {
-        if (response?.ready === true || response?.success === true)
+        if (response?.ready === true || response?.success === true) {
           safeSetPhase("READY_WAITING");
+        }
       },
     );
   };
 
   const handleSubmitAnswer = () => {
-    if (!answer.trim()) return;
+    if (!answer.trim() || submitting) return;
     setSubmitting(true);
     sendEvent(
       "GAME_EVENT",
       {
-        gameId: "internet-bachelor-123",
+        gameId: GAME_ID,
         type: "SUBMIT_DATA",
         payload: { data: { answer: answer.trim() } },
       },
@@ -1871,108 +1894,121 @@ function QuesationShowAndAns() {
     );
   };
 
-  /* ── Derive upload error message for SnapEditor ─────────────────────── */
-  const snapUploadErrorMsg = isImageUploadError
+  /* ── Derive SnapEditor props from upload mutation state ──────────────── */
+  const snapUploadErrorMsg: string | null = isImageUploadError
     ? ((imageUploadErrorData as any)?.data?.message ??
       (imageUploadErrorData as any)?.message ??
       "Upload failed")
     : null;
 
-  // The returned image URL (so SnapEditor can show a success state)
-  const snapUploadedUrl: string | null =
-    imageUploadData?.url ??
-    imageUploadData?.imageUrl ??
-    imageUploadData?.data?.url ??
-    null;
+  const snapUploadedUrl: string | null = imageUploadData
+    ? extractImageUrl(imageUploadData)
+    : null;
 
   /* ── Phase renderer ──────────────────────────────────────────────────── */
   const renderCenter = () => {
-    if (localPhase === "ELIMINATED") return <EliminatedScreen />;
+    switch (localPhase) {
+      case "ELIMINATED":
+        return <EliminatedScreen />;
 
-    if (localPhase === "ELEMENT")
-      return (
-        <ElementSpectator
-          username={currentPlayer?.username ?? currentPlayer?.name}
-        />
-      );
-
-    if (localPhase === "VIDEO")
-      return (
-        <div className="w-full">
-          <VideoCallRound
-            sendEvent={sendEvent}
-            incomingHostId={incomingHostId}
-            callKey={callKey}
-            callEndedKey={callEndedKey}
-            gameId="internet-bachelor-123"
+      case "ELEMENT":
+        return (
+          <ElementSpectator
+            username={currentPlayer?.username ?? currentPlayer?.name}
           />
-        </div>
-      );
+        );
 
-    /* ── IMAGE_UPLOAD: replaced RoundTwoStart with SnapEditor ────────── */
-    if (localPhase === "IMAGE_UPLOAD")
-      return (
-        <div className="w-full">
-          <SnapEditor
-            onSubmit={handleImageSubmit}
-            isUploading={isImageUploading}
-            uploadError={snapUploadErrorMsg}
-            uploadedUrl={snapUploadedUrl}
-          />
-        </div>
-      );
-
-    if (localPhase === "IMAGE_WAITING") return <ImageWaitingScreen />;
-    if (localPhase === "ANSWER_WAITING") return <AnswerWaitingScreen />;
-    if (localPhase === "READY_WAITING") return <ReadyWaitingScreen />;
-
-    if (localPhase === "QUESTION" && currentQuestion)
-      return (
-        <div className="w-full flex flex-col items-center gap-6 z-10">
-          <div className="w-full max-w-2xl rounded-2xl border border-amber-500/20 bg-black/30 p-6">
-            <p className="text-[10px] text-amber-500/50 uppercase tracking-[5px] font-mono mb-3">
-              Question
-            </p>
-            <p className="text-white font-semibold text-lg sm:text-xl leading-relaxed">
-              {currentQuestion}
-            </p>
-          </div>
-          <div className="w-full max-w-2xl flex flex-col gap-3">
-            <textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value.slice(0, 300))}
-              placeholder="Write your answer here…"
-              rows={5}
-              className="w-full bg-black/40 border border-amber-500/20 hover:border-amber-500/40 focus:border-amber-400/60 rounded-2xl resize-none p-4 text-sm sm:text-base text-zinc-200 placeholder:text-zinc-600 focus:outline-none transition-colors leading-relaxed"
-              style={{ fontFamily: "'Georgia', serif" }}
+      case "VIDEO":
+        return (
+          <div className="w-full">
+            <VideoCallRound
+              sendEvent={sendEvent}
+              incomingHostId={incomingHostId}
+              callKey={callKey}
+              callEndedKey={callEndedKey}
+              gameId={GAME_ID}
             />
-            <div className="flex items-center justify-between">
-              <span
-                className={`text-xs font-mono ${answer.length > 280 ? "text-rose-400" : "text-zinc-600"}`}
-              >
-                {answer.length} / 300
-              </span>
-              <Button
-                variant="game"
-                onClick={handleSubmitAnswer}
-                disabled={submitting || !answer.trim()}
-              >
-                {submitting ? "Submitting…" : "Submit Answer"}
-              </Button>
+          </div>
+        );
+
+      case "IMAGE_UPLOAD":
+        return (
+          <div className="w-full">
+            <SnapEditor
+              onSubmit={handleImageSubmit}
+              isUploading={isImageUploading}
+              uploadError={snapUploadErrorMsg}
+              uploadedUrl={snapUploadedUrl}
+            />
+          </div>
+        );
+
+      case "IMAGE_WAITING":
+        return <ImageWaitingScreen />;
+
+      case "ANSWER_WAITING":
+        return <AnswerWaitingScreen />;
+
+      case "READY_WAITING":
+        return <ReadyWaitingScreen />;
+
+      case "QUESTION":
+        if (!currentQuestion) return null;
+        return (
+          <div className="w-full flex flex-col items-center gap-6 z-10">
+            {/* Question card */}
+            <div className="w-full max-w-2xl rounded-2xl border border-amber-500/20 bg-black/30 p-6">
+              <p className="text-[10px] text-amber-500/50 uppercase tracking-[5px] font-mono mb-3">
+                Question
+              </p>
+              <p className="text-white font-semibold text-lg sm:text-xl leading-relaxed">
+                {currentQuestion}
+              </p>
+            </div>
+
+            {/* Answer textarea */}
+            <div className="w-full max-w-2xl flex flex-col gap-3">
+              <textarea
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value.slice(0, 300))}
+                placeholder="Write your answer here…"
+                rows={5}
+                className="w-full bg-black/40 border border-amber-500/20 hover:border-amber-500/40 focus:border-amber-400/60 rounded-2xl resize-none p-4 text-sm sm:text-base text-zinc-200 placeholder:text-zinc-600 focus:outline-none transition-colors leading-relaxed"
+                style={{ fontFamily: "'Georgia', serif" }}
+              />
+              <div className="flex items-center justify-between">
+                <span
+                  className={`text-xs font-mono ${
+                    answer.length > 280 ? "text-rose-400" : "text-zinc-600"
+                  }`}
+                >
+                  {answer.length} / 300
+                </span>
+                <Button
+                  variant="game"
+                  onClick={handleSubmitAnswer}
+                  disabled={submitting || !answer.trim()}
+                >
+                  {submitting ? "Submitting…" : "Submit Answer"}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      );
+        );
 
-    return (
-      <LobbyScreen
-        charIdx={charIdx}
-        lobbyText={lobbyText}
-        onReady={handleReady}
-      />
-    );
+      case "LOBBY":
+      default:
+        return (
+          <LobbyScreen
+            charIdx={charIdx}
+            lobbyText={LOBBY_TEXT}
+            onReady={handleReady}
+          />
+        );
+    }
   };
 
+  /* ── Phase label map ─────────────────────────────────────────────────── */
   const phaseLabel: Record<LocalPhase, string> = {
     LOBBY: "Lobby",
     READY_WAITING: "Ready — awaiting question",
@@ -1985,15 +2021,21 @@ function QuesationShowAndAns() {
     ELIMINATED: "Eliminated",
   };
 
+  const connected = isConnected();
+  const activeCount = participants.filter((p) => !p.isEliminated).length;
+
+  /* ── Render ──────────────────────────────────────────────────────────── */
   return (
     <div className="w-full max-w-7xl mx-auto px-4 flex flex-col gap-6">
-      {/* Status bar */}
+      {/* ── Status bar ── */}
       <div className="flex items-center gap-3">
         <span
-          className={`flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest ${isConnected() ? "text-emerald-400" : "text-rose-400"}`}
+          className={`flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest transition-colors ${
+            connected ? "text-emerald-400" : "text-rose-400"
+          }`}
         >
-          <Wifi size={12} />
-          {isConnected() ? "Connected" : "Disconnected"}
+          {connected ? <Wifi size={12} /> : <WifiOff size={12} />}
+          {connected ? "Connected" : "Disconnected"}
         </span>
         <span className="text-white/10">·</span>
         <span className="text-white/30 text-xs font-mono uppercase tracking-widest">
@@ -2001,8 +2043,9 @@ function QuesationShowAndAns() {
         </span>
       </div>
 
-      {/* Main card */}
+      {/* ── Main card ── */}
       <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-black/90 via-zinc-950/80 to-rose-950/30 backdrop-blur-sm p-8 sm:p-14 flex flex-col items-center gap-8 min-h-[400px] justify-center relative overflow-hidden">
+        {/* Decorative background radials */}
         <div
           className="absolute inset-0 pointer-events-none opacity-20"
           style={{
@@ -2010,6 +2053,8 @@ function QuesationShowAndAns() {
               "radial-gradient(circle at 20% 20%, #d97706 0%, transparent 50%), radial-gradient(circle at 80% 80%, #9f1239 0%, transparent 50%)",
           }}
         />
+
+        {/* Element flash animation (fullscreen overlay) */}
         {showElementAnimation && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl">
             <ElementSpectator
@@ -2017,20 +2062,21 @@ function QuesationShowAndAns() {
             />
           </div>
         )}
+
         {renderCenter()}
       </div>
 
-      {/* Player avatars */}
+      {/* ── Player avatars ── */}
       <div className="text-center">
         <p className="text-white/20 text-[10px] uppercase tracking-widest mb-4 font-mono">
-          Contestants — {participants.filter((p) => !p.isEliminated).length}{" "}
-          active
+          Contestants — {activeCount} active
         </p>
         <div className="flex items-center justify-center flex-wrap gap-3">
           {participants.map((p, i) => (
             <Avatar key={p.id} player={p} index={i} />
           ))}
         </div>
+
         {isElement && (
           <p className="mt-5 text-amber-400/80 text-sm font-medium tracking-wide flex items-center justify-center gap-2">
             <Sparkles size={14} /> You are one of the Seven Elements{" "}
