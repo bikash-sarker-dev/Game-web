@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
 
 // /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -532,6 +533,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "@/hooks/useSocket";
 import { clearPlayers } from "@/redux/features/sidePanel/participantsSlice";
+import { resetGameOver } from "@/redux/features/winner/Gameoverslice";
 
 const DEFAULT_VIDEO_SRC = "/videos/intro.mp4";
 
@@ -1010,6 +1012,7 @@ const StartGame: React.FC = () => {
 
   const handleVideoFinish = useCallback(() => {
     dispatch(clearPlayers());
+    dispatch(resetGameOver());
     if (!activeRole) return;
     const role = activeRole;
     setActiveRole(null);

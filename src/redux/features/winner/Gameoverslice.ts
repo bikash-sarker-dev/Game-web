@@ -29,10 +29,12 @@ const gameOverSlice = createSlice({
   initialState,
   reducers: {
     setGameOver(state, action: PayloadAction<GameWinner>) {
+      console.log("isGameOver  yes", state);
       state.isGameOver = true;
       state.winner = action.payload;
     },
     resetGameOver(state) {
+      console.log("isGameOver  null", state);
       state.isGameOver = false;
       state.winner = null;
     },
