@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
 import ReduxProvider from "@/redux/Provider";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
     >
       <body cz-shortcut-listen="true" className="min-h-full flex flex-col">
         <ReduxProvider>
+          <Toaster richColors position="top-right" />
           <Navbar />
           <main className="bg-[url('/p-bg.png')] bg-cover  bg-no-repeat min-h-screen">
             {children}

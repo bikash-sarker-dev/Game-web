@@ -584,6 +584,7 @@ import { useRouter } from "next/navigation";
 import { useSocket } from "@/hooks/useSocket";
 import ParticipantPanel from "./Participantpanel";
 import { useSocketSync } from "@/hooks/useSocketSync";
+import { toast } from "sonner";
 // import { Participant } from "@/redux/features/sidePanel/participantsSlice";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -793,6 +794,8 @@ function LobbyScreen({
         console.log("✅ Server ACK:", response);
         if (response.success) {
           router.push("/round/one");
+        } else {
+          toast.warning(response.message);
         }
       },
     );
