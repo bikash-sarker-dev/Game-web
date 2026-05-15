@@ -2044,7 +2044,7 @@ function QuesationShowAndAns() {
       </div>
 
       {/* ── Main card ── */}
-      <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-black/90 via-zinc-950/80 to-rose-950/30 backdrop-blur-sm p-8 sm:p-14 flex flex-col items-center gap-8 min-h-[400px] justify-center relative overflow-hidden">
+      <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-black/90 via-zinc-950/80 to-rose-950/30 backdrop-blur-sm p-8 sm:p-10 flex flex-col items-center gap-8 min-h-[420px] justify-center relative overflow-hidden">
         {/* Decorative background radials */}
         <div
           className="absolute inset-0 pointer-events-none opacity-20"
