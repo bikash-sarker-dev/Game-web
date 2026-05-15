@@ -1699,7 +1699,11 @@ function QuesationShowAndAns() {
   }, []);
 
   const handleGameEnded = useCallback(
-    (winner: GameWinner) => {
+    (winner: GameWinner | null, noWinner?: boolean) => {
+      if (noWinner || !winner) {
+        router.push("/no-winner");
+        return;
+      }
       dispatch(setGameOver(winner));
       router.push("/round-two/round-two-six");
     },
@@ -1760,8 +1764,8 @@ function QuesationShowAndAns() {
       console.log("🎮 Game Event received:", payload);
 
       if (payload.type === "GAME_ENDED") {
-        const winner: GameWinner | undefined = payload.payload?.winner;
-        if (winner) handleGameEnded(winner);
+        const { winner, noWinner } = payload.payload ?? {};
+        handleGameEnded(winner ?? null, noWinner === true);
         return;
       }
 
@@ -1832,9 +1836,11 @@ function QuesationShowAndAns() {
     },
 
     GAME_ENDED: (payload: any) => {
-      const winner: GameWinner | undefined =
-        payload?.winner ?? payload?.payload?.winner;
-      if (winner) handleGameEnded(winner);
+      const winner: GameWinner | null =
+        payload?.winner ?? payload?.payload?.winner ?? null;
+      const noWinner: boolean =
+        payload?.noWinner ?? payload?.payload?.noWinner ?? false;
+      handleGameEnded(winner, noWinner);
     },
   });
 

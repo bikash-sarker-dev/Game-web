@@ -23,7 +23,7 @@ export default function DeclareNeitherScreen() {
     <div
       className={`
         fixed inset-0 z-50 flex items-center justify-center
-        bg-black/95 backdrop-blur-sm
+        
         transition-opacity duration-700
         ${visible ? "opacity-100" : "opacity-0"}
       `}
@@ -42,7 +42,7 @@ export default function DeclareNeitherScreen() {
       />
 
       {/* Decorative corner marks */}
-      <span className="absolute top-6 left-6 text-neutral-800 text-xs font-mono tracking-widest select-none">
+      {/* <span className="absolute top-6 left-6 text-neutral-800 text-xs font-mono tracking-widest select-none">
         ◻ SESSION END
       </span>
       <span className="absolute top-6 right-6 text-neutral-800 text-xs font-mono tracking-widest select-none">
@@ -53,10 +53,10 @@ export default function DeclareNeitherScreen() {
       </span>
       <span className="absolute bottom-6 right-6 text-neutral-800 text-xs font-mono tracking-widest select-none">
         HOST DECISION ◻
-      </span>
+      </span> */}
 
       {/* Main card */}
-      <div className="relative z-10 w-full max-w-lg mx-4 text-center flex flex-col items-center gap-0">
+      <div className="relative z-10 w-full max-w-lg mx-4 text-center flex mt-8 flex-col items-center gap-0">
         {/* Icon block */}
         <div
           className={`
@@ -161,15 +161,15 @@ export default function DeclareNeitherScreen() {
                 None
               </p>
             </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div>
+            {/* <div className="w-px h-8 bg-white/10" /> */}
+            {/* <div>
               <p className="text-[10px] text-neutral-600 uppercase tracking-widest font-mono mb-1">
                 Points Awarded
               </p>
               <p className="text-sm font-black text-neutral-400 tracking-widest">
                 0
               </p>
-            </div>
+            </div> */}
             <div className="w-px h-8 bg-white/10" />
             <div>
               <p className="text-[10px] text-neutral-600 uppercase tracking-widest font-mono mb-1">
@@ -198,7 +198,7 @@ export default function DeclareNeitherScreen() {
               transition-all duration-300 cursor-pointer
             "
           >
-            Return to Dashboard
+            Return to Home
           </button>
         </div>
       </div>

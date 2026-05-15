@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
 
 // import ParticipantPanel from "@/components/roundOne/Participantpanel";
@@ -586,8 +587,6 @@ function PlayerCard({
   onEliminate,
   isEliminating,
   isCallDisabled,
-  onDeclareNeither,
-  isDeclaring,
 }: {
   player: Player;
   index: number;
@@ -595,148 +594,120 @@ function PlayerCard({
   onEliminate: (p: Player) => void;
   isEliminating: boolean;
   isCallDisabled: boolean;
-  onDeclareNeither: () => void;
-  isDeclaring: boolean;
 }) {
   const name = player.name ?? `Player ${index + 1}`;
   const isEliminated = player.isEliminated;
 
   return (
-    <div
-      className={`relative flex flex-col rounded-2xl overflow-hidden border transition-all duration-500 ${
-        isEliminated
-          ? "border-red-900/60 opacity-50 grayscale"
-          : "border-white/10 bg-gradient-to-b from-neutral-900/90 to-black/95 hover:border-orange-500/40 hover:shadow-[0_0_24px_rgba(249,115,22,0.15)]"
-      }`}
-    >
-      {/* Status badges */}
-      <div className="absolute top-3 right-3 flex flex-col gap-1 z-10">
-        <span
-          className={`text-[9px] font-black tracking-widest px-2 py-0.5 rounded-full ${
-            player.isConnected
-              ? "bg-green-500/20 text-green-400 border border-green-500/40"
-              : "bg-red-500/20 text-red-400 border border-red-500/40"
-          }`}
-        >
-          {player.isConnected ? "● ONLINE" : "● OFFLINE"}
-        </span>
-        {player.hasNetworkIssue && (
-          <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/40">
-            ⚠ NET
+    <>
+      <div
+        className={`relative flex flex-col rounded-2xl overflow-hidden border transition-all duration-500 ${
+          isEliminated
+            ? "border-red-900/60 opacity-50 grayscale"
+            : "border-white/10 bg-gradient-to-b from-neutral-900/90 to-black/95 hover:border-orange-500/40 hover:shadow-[0_0_24px_rgba(249,115,22,0.15)]"
+        }`}
+      >
+        {/* Status badges */}
+        <div className="absolute top-3 right-3 flex flex-col gap-1 z-10">
+          <span
+            className={`text-[9px] font-black tracking-widest px-2 py-0.5 rounded-full ${
+              player.isConnected
+                ? "bg-green-500/20 text-green-400 border border-green-500/40"
+                : "bg-red-500/20 text-red-400 border border-red-500/40"
+            }`}
+          >
+            {player.isConnected ? "● ONLINE" : "● OFFLINE"}
           </span>
-        )}
-      </div>
-
-      {/* Name + ID */}
-      <div className="text-center pt-4 pb-2 px-4">
-        <p className="text-white font-black text-sm tracking-widest uppercase truncate">
-          {name}
-        </p>
-        <p className="text-white/35 text-[9px] tracking-[0.3em] uppercase font-mono mt-1">
-          ID
-        </p>
-        <p className="text-white/50 font-mono text-[10px] break-all mt-0.5">
-          {player.id}
-        </p>
-      </div>
-
-      {/* Avatar */}
-      <div className="relative w-full aspect-square overflow-hidden px-4">
-        <img
-          src={player.avatar}
-          alt={name}
-          className="w-full h-full object-cover object-top rounded-xl transition-transform duration-700 hover:scale-105"
-          style={{ backgroundColor: BG_COLORS[index % BG_COLORS.length] }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none rounded-xl" />
-        <div className="absolute bottom-3 left-7 bg-black/70 border border-white/10 rounded-lg px-2 py-1">
-          <span className="text-yellow-400 text-xs font-black">
-            ⭐ {player.points}
-          </span>
+          {player.hasNetworkIssue && (
+            <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/40">
+              ⚠ NET
+            </span>
+          )}
         </div>
-      </div>
 
-      {/* Buttons */}
-      <div className="p-4 flex flex-col gap-2">
-        {/* Video Call */}
-        <button
-          onClick={() => onCall(player, index)}
-          disabled={isEliminated || isEliminating || isCallDisabled}
-          title={
-            isCallDisabled ? "Call already ended for this player" : undefined
-          }
-          className={`w-full py-3 rounded-xl text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 text-white flex items-center justify-center gap-2
+        {/* Name + ID */}
+        <div className="text-center pt-4 pb-2 px-4">
+          <p className="text-white font-black text-sm tracking-widest uppercase truncate">
+            {name}
+          </p>
+          <p className="text-white/35 text-[9px] tracking-[0.3em] uppercase font-mono mt-1">
+            ID
+          </p>
+          <p className="text-white/50 font-mono text-[10px] break-all mt-0.5">
+            {player.id}
+          </p>
+        </div>
+
+        {/* Avatar */}
+        <div className="relative w-full aspect-square overflow-hidden px-4">
+          <img
+            src={player.avatar}
+            alt={name}
+            className="w-full h-full object-cover object-top rounded-xl transition-transform duration-700 hover:scale-105"
+            style={{ backgroundColor: BG_COLORS[index % BG_COLORS.length] }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none rounded-xl" />
+          <div className="absolute bottom-3 left-7 bg-black/70 border border-white/10 rounded-lg px-2 py-1">
+            <span className="text-yellow-400 text-xs font-black">
+              ⭐ {player.points}
+            </span>
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="p-4 flex flex-col gap-2">
+          {/* Video Call */}
+          <button
+            onClick={() => onCall(player, index)}
+            disabled={isEliminated || isEliminating || isCallDisabled}
+            title={
+              isCallDisabled ? "Call already ended for this player" : undefined
+            }
+            className={`w-full py-3 rounded-xl text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 text-white flex items-center justify-center gap-2
             ${
               isCallDisabled
                 ? "bg-neutral-700/50 border border-neutral-600/40 cursor-not-allowed opacity-50"
                 : "bg-green-700 hover:bg-green-800 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             }
           `}
-        >
-          {isCallDisabled ? (
-            <>
-              <span>🔇</span> Call Ended
-            </>
-          ) : (
-            <>
-              <span>🎥</span> Video Call
-            </>
-          )}
-        </button>
-
-        {/* Eliminate */}
-        <Button
-          variant="game"
-          onClick={() => onEliminate(player)}
-          disabled={isEliminating || isEliminated}
-          className="w-full flex items-center justify-center gap-2"
-        >
-          {isEliminated ? (
-            <>
-              <span>💀</span> Eliminated
-            </>
-          ) : isEliminating ? (
-            <>
-              <span className="w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin inline-block" />{" "}
-              Eliminating…
-            </>
-          ) : (
-            <>
-              <span>⚡</span> Eliminate Player
-            </>
-          )}
-        </Button>
-
-        {/* ── Declare Neither ─────────────────────────────────────────────── */}
-        {!isEliminated && (
-          <button
-            onClick={onDeclareNeither}
-            disabled={isDeclaring || isEliminating}
-            className={`
-              w-full py-3 rounded-xl text-xs font-black tracking-[0.2em] uppercase
-              transition-all duration-300 flex items-center justify-center gap-2
-              border
-              ${
-                isDeclaring || isEliminating
-                  ? "bg-neutral-800/60 border-neutral-700/40 text-neutral-500 cursor-not-allowed opacity-60"
-                  : "bg-transparent border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 hover:text-orange-300 hover:shadow-[0_0_16px_rgba(249,115,22,0.2)] cursor-pointer"
-              }
-            `}
           >
-            {isDeclaring ? (
+            {isCallDisabled ? (
               <>
-                <span className="w-3 h-3 rounded-full border-2 border-orange-400 border-t-transparent animate-spin inline-block" />{" "}
-                Declaring…
+                <span>🔇</span> Call Ended
               </>
             ) : (
               <>
-                <span>🚫</span> Declare Neither
+                <span>🎥</span> Video Call
               </>
             )}
           </button>
-        )}
+
+          {/* Eliminate */}
+          <Button
+            variant="game"
+            onClick={() => onEliminate(player)}
+            disabled={isEliminating || isEliminated}
+            className="w-full flex items-center justify-center gap-2"
+          >
+            {isEliminated ? (
+              <>
+                <span>💀</span> Eliminated
+              </>
+            ) : isEliminating ? (
+              <>
+                <span className="w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin inline-block" />{" "}
+                Eliminating…
+              </>
+            ) : (
+              <>
+                <span>⚡</span> Eliminate Player
+              </>
+            )}
+          </Button>
+        </div>
       </div>
-    </div>
+      {/* ── Declare Neither ─────────────────────────────────────────────── */}
+    </>
   );
 }
 
@@ -853,7 +824,7 @@ export default function GrandFinale() {
       (response: any) => {
         console.log("🚫 DECLARE_NEITHER ACK:", response);
         if (response?.success) {
-          setShowNeitherScreen(true);
+          router.push("/no-winner");
         } else {
           console.warn("❌ Declare Neither failed:", response);
           setDeclareError("Failed to declare. Please try again.");
@@ -861,7 +832,7 @@ export default function GrandFinale() {
         }
       },
     );
-  }, [sendEvent, isDeclaring]);
+  }, [sendEvent, isDeclaring, router]);
 
   return (
     <div className="w-full max-w-7xl mx-auto relative overflow-hidden font-sans">
@@ -922,31 +893,58 @@ export default function GrandFinale() {
                 </p>
               </div>
             ) : (
-              <div
-                className={`grid gap-4 ${
-                  activePlayers.length === 1
-                    ? "grid-cols-1 max-w-xs mx-auto"
-                    : activePlayers.length === 2
-                      ? "grid-cols-2"
-                      : activePlayers.length === 3
-                        ? "grid-cols-3"
-                        : "grid-cols-2"
-                }`}
-              >
-                {activePlayers.map((player: Player, index: number) => (
-                  <PlayerCard
-                    key={player.id}
-                    player={player}
-                    index={index}
-                    onCall={(p, i) => setActiveCall({ player: p, index: i })}
-                    onEliminate={handleEliminate}
-                    isEliminating={eliminatingId === player.id}
-                    isCallDisabled={endedCallIds.has(player.id)}
-                    onDeclareNeither={handleDeclareNeither}
-                    isDeclaring={isDeclaring}
-                  />
-                ))}
-              </div>
+              <>
+                <div
+                  className={`grid gap-4 ${
+                    activePlayers.length === 1
+                      ? "grid-cols-1 max-w-xs mx-auto"
+                      : activePlayers.length === 2
+                        ? "grid-cols-2"
+                        : activePlayers.length === 3
+                          ? "grid-cols-3"
+                          : "grid-cols-2"
+                  }`}
+                >
+                  {activePlayers.map((player: Player, index: number) => (
+                    <PlayerCard
+                      key={player.id}
+                      player={player}
+                      index={index}
+                      onCall={(p, i) => setActiveCall({ player: p, index: i })}
+                      onEliminate={handleEliminate}
+                      isEliminating={eliminatingId === player.id}
+                      isCallDisabled={endedCallIds.has(player.id)}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-center items-center mt-5">
+                  <button
+                    onClick={handleDeclareNeither}
+                    disabled={isDeclaring}
+                    className={`
+              w-full py-3 rounded-xl text-xs font-black tracking-[0.2em] uppercase
+              transition-all duration-300 flex items-center justify-center gap-2
+              border
+              ${
+                isDeclaring
+                  ? "bg-neutral-800/60 border-neutral-700/40 text-neutral-500 cursor-not-allowed opacity-60"
+                  : "bg-transparent border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 hover:text-orange-300 hover:shadow-[0_0_16px_rgba(249,115,22,0.2)] cursor-pointer"
+              }
+            `}
+                  >
+                    {isDeclaring ? (
+                      <>
+                        <span className="w-3 h-3 rounded-full border-2 border-orange-400 border-t-transparent animate-spin inline-block" />{" "}
+                        Declaring…
+                      </>
+                    ) : (
+                      <>
+                        <span>🚫</span> Declare Neither
+                      </>
+                    )}
+                  </button>
+                </div>
+              </>
             )}
           </div>
 
