@@ -1154,7 +1154,7 @@ export default function SnapEditor({
         {/* Sidebar */}
         {captured && (
           <div
-            className="w-60 rounded-2xl p-3 text-white flex flex-col gap-3 shadow-2xl overflow-y-auto"
+            className="w-68 rounded-2xl p-3 text-white flex flex-col gap-3 shadow-2xl overflow-y-auto"
             style={{
               background: "#13152a",
               border: "1px solid rgba(255,255,255,0.06)",
