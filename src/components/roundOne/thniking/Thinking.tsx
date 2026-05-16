@@ -233,7 +233,7 @@ export default function ThinkingProccess() {
   return (
     <div className="min-h-screen w-full flex flex-col items-center ">
       {/* Top bar */}
-      <header className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-5 pb-2 flex items-center justify-between">
+      {/* <header className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-5 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
           <span className="text-red-400/80 text-[10px] font-bold tracking-[0.2em] uppercase">
@@ -257,15 +257,15 @@ export default function ThinkingProccess() {
           </svg>
           {fmt(timer)}
         </div>
-      </header>
+      </header> */}
 
       {/* Hero Title */}
       <div className="w-full max-w-6xl px-4 pt-6 pb-8 text-center">
         <p className="text-red-500/50 text-xs tracking-[0.35em] font-bold uppercase mb-3">
           HOST CONTROL PANEL
         </p>
-        <h1 className="text-4xl sm:text-5xl font-black uppercase tracking-widest text-white">
-          ROUND 1 — THINKING PHASE
+        <h1 className="text-4xl sm:text-5xl uppercase font-black  tracking-widest text-white">
+          ROUND 1 — question answer
         </h1>
       </div>
 
