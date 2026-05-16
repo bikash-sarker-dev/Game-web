@@ -129,10 +129,11 @@ export default function EliminationGame() {
                 Pictures
               </span>
             </h1>
-            <p className="mt-2 text-gray-500 text-xs sm:text-sm tracking-widest uppercase">
-              {eliminated.length === 0
+            <p className="mt-2 text-gray-500 text-xs sm:text-sm font-medium tracking-widest capitalize ">
+              Eliminate Down to 2
+              {/* {eliminated.length === 0
                 ? "Select players to eliminate"
-                : `${eliminated.length} player${eliminated.length !== 1 ? "s" : ""} eliminated`}
+                : `${eliminated.length} player${eliminated.length !== 1 ? "s" : ""} eliminated`} */}
             </p>
           </div>
 

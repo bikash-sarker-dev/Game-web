@@ -855,8 +855,8 @@ export default function GrandFinale() {
           <h1 className="text-3xl sm:text-4xl font-black tracking-[0.15em] uppercase text-white drop-shadow-[0_0_30px_rgba(220,38,38,0.4)]">
             The Grand Finale
           </h1>
-          <p className="text-red-500 text-xs font-black tracking-[0.4em] uppercase animate-pulse">
-            Eliminate Down to 2
+          <p className="text-red-500 text-sm font-black tracking-[0.4em]  capitalize animate-pulse">
+            Pick Final Winner
           </p>
           <div className="flex items-center justify-center gap-4 pt-2">
             <div className="h-px w-32 bg-gradient-to-r from-transparent to-red-700" />

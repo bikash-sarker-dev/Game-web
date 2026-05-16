@@ -267,12 +267,15 @@ export default function ThinkingProccess() {
         <h1 className="text-4xl sm:text-5xl uppercase font-black  tracking-widest text-white">
           ROUND 1 — question answer
         </h1>
+        <p className="text-red-500/50 text-base tracking-[0.10em]  font-bold  capitalize mt-3">
+          Eliminate Down to {players.length}
+        </p>
       </div>
 
       {/* Stats */}
       <div className="w-full max-w-7xl px-4 pb-8 flex flex-wrap justify-center gap-3">
         {[
-          { label: "ROUND", value: "1 of 5" },
+          { label: "ROUND", value: "1 of 3" },
           { label: "POINTS", value: "100 pts" },
           { label: "ANSWERED", value: `${players.length} / 7` },
         ].map((s) => (
