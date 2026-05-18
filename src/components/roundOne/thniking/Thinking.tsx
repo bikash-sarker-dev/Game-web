@@ -265,7 +265,7 @@ export default function ThinkingProccess() {
           HOST CONTROL PANEL
         </p>
         <h1 className="text-4xl sm:text-5xl uppercase font-black  tracking-widest text-white">
-          ROUND 1 — question answer
+          ROUND 1 — Questions
         </h1>
         <p className="text-red-500/50 text-base tracking-[0.10em]  font-bold  capitalize mt-3">
           Eliminate Down to {players.length}
