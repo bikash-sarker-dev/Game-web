@@ -2,7 +2,7 @@
 // "use client";
 
 // import Button from "@/components/share/ButtonPrimary";
-// import { useState, useEffect, useRef } from "react";
+// import { useState, useEffect, useRef, useCallback } from "react";
 // import { useRouter } from "next/navigation";
 // import {
 //   Check,
@@ -11,12 +11,14 @@
 //   Phone,
 //   Image as ImageIcon,
 //   Wifi,
+//   WifiOff,
 // } from "lucide-react";
 // import { useSelector, useDispatch } from "react-redux";
 // import { useSocket } from "@/hooks/useSocket";
-// import RoundTwoStart from "@/components/roundTwo/secondRoundStart/SecondRoundStart";
 // import VideoCallRound from "./Videocallround";
 // import { GameWinner, setGameOver } from "@/redux/features/winner/Gameoverslice";
+// import { useFileUploadingMutation } from "@/redux/api/getMe/getMeApi";
+// import SnapEditor from "@/components/snapEdit/Snapedit";
 
 // /* ─── Types ──────────────────────────────────────────────────────────────── */
 // interface ServerPlayer {
@@ -43,7 +45,7 @@
 //   | "ELEMENT"
 //   | "ELIMINATED";
 
-// /* ─── Tiny animated dot row ─────────────────────────────────────────────── */
+// /* ─── Animated dot row ───────────────────────────────────────────────────── */
 // function PulseDots({ count = 3 }: { count?: number }) {
 //   return (
 //     <div className="flex items-center gap-1.5">
@@ -109,6 +111,7 @@
 //   );
 // }
 
+// /* ─── Element spectator screen ───────────────────────────────────────────── */
 // function ElementSpectator({ username }: { username?: string }) {
 //   return (
 //     <div className="relative flex flex-col items-center gap-8 py-6 w-full overflow-hidden">
@@ -179,7 +182,7 @@
 //             className="w-2 h-2 rounded-full"
 //             style={{
 //               background: `hsl(${40 + i * 10}, 90%, 60%)`,
-//               animation: `ping 1.4s cubic-bezier(0,0,0.2,1) infinite`,
+//               animation: "ping 1.4s cubic-bezier(0,0,0.2,1) infinite",
 //               animationDelay: `${i * 100}ms`,
 //             }}
 //           />
@@ -193,6 +196,7 @@
 //   );
 // }
 
+// /* ─── Eliminated screen ──────────────────────────────────────────────────── */
 // function EliminatedScreen() {
 //   const router = useRouter();
 //   return (
@@ -218,6 +222,7 @@
 //   );
 // }
 
+// /* ─── Lobby screen ───────────────────────────────────────────────────────── */
 // function LobbyScreen({
 //   charIdx,
 //   lobbyText,
@@ -252,6 +257,7 @@
 //   );
 // }
 
+// /* ─── Waiting screens ────────────────────────────────────────────────────── */
 // function ReadyWaitingScreen() {
 //   return (
 //     <WaitingCard
@@ -262,6 +268,7 @@
 //     />
 //   );
 // }
+
 // function AnswerWaitingScreen() {
 //   return (
 //     <WaitingCard
@@ -272,6 +279,7 @@
 //     />
 //   );
 // }
+
 // function ImageWaitingScreen() {
 //   return (
 //     <WaitingCard
@@ -283,12 +291,22 @@
 //   );
 // }
 
+// /* ─── Player avatar ──────────────────────────────────────────────────────── */
 // function Avatar({ player, index }: { player: ServerPlayer; index: number }) {
 //   const isEl = player.isElement === true;
 //   const isElim = player.isEliminated;
 //   return (
 //     <div
-//       className={`relative w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-500 ${isEl ? "bg-gradient-to-br from-amber-400 to-rose-500 border-amber-300 text-black scale-110 shadow-2xl shadow-amber-500/50" : isElim ? "bg-rose-950/40 border-rose-800/40 text-rose-800 opacity-40 scale-90" : player.isReady || player.ready ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-300" : "bg-amber-500/10 border-amber-500/30 text-amber-400/60"}`}
+//       title={player.username ?? player.name ?? `Player ${index + 1}`}
+//       className={`relative w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-500 ${
+//         isEl
+//           ? "bg-gradient-to-br from-amber-400 to-rose-500 border-amber-300 text-black scale-110 shadow-2xl shadow-amber-500/50"
+//           : isElim
+//             ? "bg-rose-950/40 border-rose-800/40 text-rose-800 opacity-40 scale-90"
+//             : player.isReady || player.ready
+//               ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-300"
+//               : "bg-amber-500/10 border-amber-500/30 text-amber-400/60"
+//       }`}
 //     >
 //       {index + 1}
 //       {isEl && (
@@ -311,13 +329,16 @@
 // /* ════════════════════════════════════════════════════════════════════════════
 //    Main Component
 // ══════════════════════════════════════════════════════════════════════════════ */
+// const GAME_ID = "internet-bachelor-123";
+// const LOBBY_TEXT = '"CONNECTED TO LOBBY"';
+
 // function QuesationShowAndAns() {
 //   const router = useRouter();
 //   const dispatch = useDispatch();
-//   const lobbyText = '"CONNECTED TO LOBBY"';
+
+//   /* ── State ───────────────────────────────────────────────────────────── */
 //   const [charIdx, setCharIdx] = useState(0);
 //   const [localPhase, setLocalPhase] = useState<LocalPhase>("LOBBY");
-//   const [gamePhase, setGamePhase] = useState("");
 //   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
 //   const [answer, setAnswer] = useState("");
 //   const [submitting, setSubmitting] = useState(false);
@@ -327,48 +348,118 @@
 //   const [callKey, setCallKey] = useState(0);
 //   const [callEndedKey, setCallEndedKey] = useState(0);
 
+//   /* ── Redux ───────────────────────────────────────────────────────────── */
 //   const currentUser = useSelector((state: any) => state.user.user);
 //   const participants: ServerPlayer[] = useSelector(
 //     (state: any) => state.participants?.players ?? [],
 //   );
+
 //   const currentPlayer = participants.find((p) => p.id === currentUser?.id);
 //   const isElement = currentPlayer?.isElement === true;
 //   const isEliminated = currentPlayer?.isEliminated === true;
 
+//   /* ── Refs ────────────────────────────────────────────────────────────── */
+//   // Keep a ref so socket callbacks always see the latest eliminated status
 //   const isEliminatedRef = useRef(false);
 //   useEffect(() => {
 //     isEliminatedRef.current = isEliminated;
 //   }, [isEliminated]);
 
-//   const safeSetPhase = (phase: LocalPhase) => {
+//   /* ── File upload mutation ────────────────────────────────────────────── */
+//   const [
+//     uploadFile,
+//     {
+//       isLoading: isImageUploading,
+//       isError: isImageUploadError,
+//       error: imageUploadErrorData,
+//       data: imageUploadData,
+//     },
+//   ] = useFileUploadingMutation();
+
+//   /* ── Helpers ─────────────────────────────────────────────────────────── */
+//   const safeSetPhase = useCallback((phase: LocalPhase) => {
 //     if (isEliminatedRef.current && phase !== "ELIMINATED") return;
 //     setLocalPhase(phase);
-//   };
+//   }, []);
+
+//   const handleGameEnded = useCallback(
+//     (winner: GameWinner | null, noWinner?: boolean) => {
+//       if (noWinner || !winner) {
+//         router.push("/no-winner");
+//         return;
+//       }
+//       dispatch(setGameOver(winner));
+//       router.push("/round-two/round-two-six");
+//     },
+//     [dispatch, router],
+//   );
 
 //   /**
-//    * Dispatches winner to Redux, then navigates to /game-over.
-//    * GameOverScreen reads directly from store — no URL params needed.
+//    * Extract URL from API response.
+//    * Your server returns: { success: true, message: "...", data: "https://..." }
+//    * `data` is the URL string directly — not an object.
 //    */
-//   const handleGameEnded = (winner: GameWinner) => {
-//     dispatch(setGameOver(winner));
-//     router.push("/round-two/round-two-six");
+//   const extractImageUrl = (result: any): string => {
+//     if (typeof result?.data === "string" && result.data.startsWith("http")) {
+//       return result.data;
+//     }
+//     // Fallback shapes for other possible API responses
+//     return (
+//       result?.url ?? result?.imageUrl ?? result?.data?.url ?? result?.path ?? ""
+//     );
 //   };
 
+//   /* ── Image submit: upload then socket ────────────────────────────────── */
+//   const handleImageSubmit = useCallback(
+//     async (blob: Blob) => {
+//       try {
+//         const formData = new FormData();
+//         formData.append("file", blob, `snap-${Date.now()}.png`);
+
+//         const result = await uploadFile(formData).unwrap();
+//         const imageUrl = extractImageUrl(result);
+
+//         if (!imageUrl) throw new Error("No URL returned from upload API");
+
+//         sendEvent(
+//           "GAME_EVENT",
+//           {
+//             gameId: GAME_ID,
+//             type: "SUBMIT_DATA",
+//             payload: { data: { imageUrl } },
+//           },
+//           (response: any) => {
+//             if (response?.success === true) {
+//               safeSetPhase("IMAGE_WAITING");
+//             }
+//           },
+//         );
+//       } catch (err) {
+//         console.error("Image upload failed:", err);
+//       }
+//     },
+//     // eslint-disable-next-line react-hooks/exhaustive-deps
+//     [uploadFile, safeSetPhase],
+//   );
+
+//   /* ── Socket ──────────────────────────────────────────────────────────── */
 //   const { sendEvent, isConnected } = useSocket({
 //     GAME_EVENT: (payload: any) => {
 //       console.log("🎮 Game Event received:", payload);
 
-//       // GAME_ENDED — always processed, not gated by elimination
 //       if (payload.type === "GAME_ENDED") {
-//         const winner: GameWinner | undefined = payload.payload?.winner;
-//         if (winner) handleGameEnded(winner);
+//         const { winner, noWinner } = payload.payload ?? {};
+//         handleGameEnded(winner ?? null, noWinner === true);
 //         return;
 //       }
 
+//       // Only process non-update events if not eliminated
 //       if (isEliminatedRef.current && payload.type !== "PLAYERS_UPDATE") return;
 
 //       if (payload.type === "PLAYERS_UPDATE" && Array.isArray(payload.payload)) {
 //         const newParticipants = payload.payload as ServerPlayer[];
+
+//         // Check if current user just became an Element
 //         const isNowElement = newParticipants.some(
 //           (p) => p.id === currentUser?.id && p.isElement === true,
 //         );
@@ -378,6 +469,8 @@
 //           setTimeout(() => setShowElementAnimation(false), 4200);
 //         }
 //         setPreviousElementStatus(isNowElement);
+
+//         // Check if current user is now eliminated
 //         const nowEliminated = newParticipants.some(
 //           (p) => p.id === currentUser?.id && p.isEliminated === true,
 //         );
@@ -392,27 +485,31 @@
 //         setAnswer("");
 //         safeSetPhase("QUESTION");
 //       }
+
 //       if (payload.type === "ROUND_STARTED") {
-//         setGamePhase(payload.payload.type);
 //         setIncomingHostId(null);
 //         setCallKey(0);
 //         setCallEndedKey(0);
 //         if (payload.payload.type === "IMAGE") safeSetPhase("IMAGE_UPLOAD");
 //         if (payload.payload.type === "VIDEO") safeSetPhase("VIDEO");
 //       }
+
 //       if (payload.type === "INCOMING_CALL") {
 //         setIncomingHostId(payload.payload.hostId);
 //         setCallKey((p) => p + 1);
 //         safeSetPhase("VIDEO");
 //       }
+
 //       if (payload.type === "CALL_ENDED") {
 //         setIncomingHostId(null);
 //         setCallEndedKey((p) => p + 1);
 //       }
 //     },
 
-//     ROSE_GIVEN: (payload) => console.log("🌹 Rose given to:", payload.player),
-//     PLAYER_ELIMINATED: (payload) => {
+//     ROSE_GIVEN: (payload: any) =>
+//       console.log("🌹 Rose given to:", payload.player),
+
+//     PLAYER_ELIMINATED: (payload: any) => {
 //       if (
 //         payload.player?.id === currentUser?.id ||
 //         payload.playerId === currentUser?.id
@@ -421,47 +518,59 @@
 //         setLocalPhase("ELIMINATED");
 //       }
 //     },
-//     // Top-level GAME_ENDED (if server emits outside GAME_EVENT wrapper)
+
 //     GAME_ENDED: (payload: any) => {
-//       const winner: GameWinner | undefined =
-//         payload?.winner ?? payload?.payload?.winner;
-//       if (winner) handleGameEnded(winner);
+//       const winner: GameWinner | null =
+//         payload?.winner ?? payload?.payload?.winner ?? null;
+//       const noWinner: boolean =
+//         payload?.noWinner ?? payload?.payload?.noWinner ?? false;
+//       handleGameEnded(winner, noWinner);
 //     },
 //   });
 
+//   /* ── Effects ─────────────────────────────────────────────────────────── */
+//   // Lobby typewriter animation
 //   useEffect(() => {
-//     if (localPhase === "LOBBY" && charIdx < lobbyText.length) {
-//       const t = setTimeout(() => setCharIdx((c) => c + 1), 40);
-//       return () => clearTimeout(t);
-//     }
-//   }, [charIdx, lobbyText.length, localPhase]);
+//     if (localPhase !== "LOBBY") return;
+//     if (charIdx >= LOBBY_TEXT.length) return;
+//     const t = setTimeout(() => setCharIdx((c) => c + 1), 40);
+//     return () => clearTimeout(t);
+//   }, [charIdx, localPhase]);
 
+//   // Sync elimination / element status from redux
 //   useEffect(() => {
 //     if (isEliminated) {
 //       isEliminatedRef.current = true;
 //       setLocalPhase("ELIMINATED");
-//     } else if (isElement && localPhase !== "ELEMENT" && localPhase !== "VIDEO")
+//     } else if (
+//       isElement &&
+//       localPhase !== "ELEMENT" &&
+//       localPhase !== "VIDEO"
+//     ) {
 //       safeSetPhase("ELEMENT");
-//   }, [isElement, isEliminated]);
+//     }
+//   }, [isElement, isEliminated, localPhase, safeSetPhase]);
 
+//   /* ── Action handlers ─────────────────────────────────────────────────── */
 //   const handleReady = () => {
 //     sendEvent(
 //       "GAME_EVENT",
-//       { gameId: "internet-bachelor-123", type: "PLAYER_READY", payload: {} },
+//       { gameId: GAME_ID, type: "PLAYER_READY", payload: {} },
 //       (response: any) => {
-//         if (response?.ready === true || response?.success === true)
+//         if (response?.ready === true || response?.success === true) {
 //           safeSetPhase("READY_WAITING");
+//         }
 //       },
 //     );
 //   };
 
 //   const handleSubmitAnswer = () => {
-//     if (!answer.trim()) return;
+//     if (!answer.trim() || submitting) return;
 //     setSubmitting(true);
 //     sendEvent(
 //       "GAME_EVENT",
 //       {
-//         gameId: "internet-bachelor-123",
+//         gameId: GAME_ID,
 //         type: "SUBMIT_DATA",
 //         payload: { data: { answer: answer.trim() } },
 //       },
@@ -475,81 +584,121 @@
 //     );
 //   };
 
+//   /* ── Derive SnapEditor props from upload mutation state ──────────────── */
+//   const snapUploadErrorMsg: string | null = isImageUploadError
+//     ? ((imageUploadErrorData as any)?.data?.message ??
+//       (imageUploadErrorData as any)?.message ??
+//       "Upload failed")
+//     : null;
+
+//   const snapUploadedUrl: string | null = imageUploadData
+//     ? extractImageUrl(imageUploadData)
+//     : null;
+
+//   /* ── Phase renderer ──────────────────────────────────────────────────── */
 //   const renderCenter = () => {
-//     if (localPhase === "ELIMINATED") return <EliminatedScreen />;
-//     if (localPhase === "ELEMENT")
-//       return (
-//         <ElementSpectator
-//           username={currentPlayer?.username ?? currentPlayer?.name}
-//         />
-//       );
-//     if (localPhase === "VIDEO")
-//       return (
-//         <div className="w-full">
-//           <VideoCallRound
-//             sendEvent={sendEvent}
-//             incomingHostId={incomingHostId}
-//             callKey={callKey}
-//             callEndedKey={callEndedKey}
-//             gameId="internet-bachelor-123"
+//     switch (localPhase) {
+//       case "ELIMINATED":
+//         return <EliminatedScreen />;
+
+//       case "ELEMENT":
+//         return (
+//           <ElementSpectator
+//             username={currentPlayer?.username ?? currentPlayer?.name}
 //           />
-//         </div>
-//       );
-//     if (localPhase === "IMAGE_UPLOAD")
-//       return (
-//         <div className="w-full">
-//           <RoundTwoStart />
-//         </div>
-//       );
-//     if (localPhase === "IMAGE_WAITING") return <ImageWaitingScreen />;
-//     if (localPhase === "ANSWER_WAITING") return <AnswerWaitingScreen />;
-//     if (localPhase === "READY_WAITING") return <ReadyWaitingScreen />;
-//     if (localPhase === "QUESTION" && currentQuestion)
-//       return (
-//         <div className="w-full flex flex-col items-center gap-6 z-10">
-//           <div className="w-full max-w-2xl rounded-2xl border border-amber-500/20 bg-black/30 p-6">
-//             <p className="text-[10px] text-amber-500/50 uppercase tracking-[5px] font-mono mb-3">
-//               Question
-//             </p>
-//             <p className="text-white font-semibold text-lg sm:text-xl leading-relaxed">
-//               {currentQuestion}
-//             </p>
-//           </div>
-//           <div className="w-full max-w-2xl flex flex-col gap-3">
-//             <textarea
-//               value={answer}
-//               onChange={(e) => setAnswer(e.target.value.slice(0, 300))}
-//               placeholder="Write your answer here…"
-//               rows={5}
-//               className="w-full bg-black/40 border border-amber-500/20 hover:border-amber-500/40 focus:border-amber-400/60 rounded-2xl resize-none p-4 text-sm sm:text-base text-zinc-200 placeholder:text-zinc-600 focus:outline-none transition-colors leading-relaxed"
-//               style={{ fontFamily: "'Georgia', serif" }}
+//         );
+
+//       case "VIDEO":
+//         return (
+//           <div className="w-full">
+//             <VideoCallRound
+//               sendEvent={sendEvent}
+//               incomingHostId={incomingHostId}
+//               callKey={callKey}
+//               callEndedKey={callEndedKey}
+//               gameId={GAME_ID}
 //             />
-//             <div className="flex items-center justify-between">
-//               <span
-//                 className={`text-xs font-mono ${answer.length > 280 ? "text-rose-400" : "text-zinc-600"}`}
-//               >
-//                 {answer.length} / 300
-//               </span>
-//               <Button
-//                 variant="game"
-//                 onClick={handleSubmitAnswer}
-//                 disabled={submitting || !answer.trim()}
-//               >
-//                 {submitting ? "Submitting…" : "Submit Answer"}
-//               </Button>
+//           </div>
+//         );
+
+//       case "IMAGE_UPLOAD":
+//         return (
+//           <div className="w-full">
+//             <SnapEditor
+//               onSubmit={handleImageSubmit}
+//               isUploading={isImageUploading}
+//               uploadError={snapUploadErrorMsg}
+//               uploadedUrl={snapUploadedUrl}
+//             />
+//           </div>
+//         );
+
+//       case "IMAGE_WAITING":
+//         return <ImageWaitingScreen />;
+
+//       case "ANSWER_WAITING":
+//         return <AnswerWaitingScreen />;
+
+//       case "READY_WAITING":
+//         return <ReadyWaitingScreen />;
+
+//       case "QUESTION":
+//         if (!currentQuestion) return null;
+//         return (
+//           <div className="w-full flex flex-col items-center gap-6 z-10">
+//             {/* Question card */}
+//             <div className="w-full max-w-2xl rounded-2xl border border-amber-500/20 bg-black/30 p-6">
+//               <p className="text-[10px] text-amber-500/50 uppercase tracking-[5px] font-mono mb-3">
+//                 Question
+//               </p>
+//               <p className="text-white font-semibold text-lg sm:text-xl leading-relaxed">
+//                 {currentQuestion}
+//               </p>
+//             </div>
+
+//             {/* Answer textarea */}
+//             <div className="w-full max-w-2xl flex flex-col gap-3">
+//               <textarea
+//                 value={answer}
+//                 onChange={(e) => setAnswer(e.target.value.slice(0, 300))}
+//                 placeholder="Write your answer here…"
+//                 rows={5}
+//                 className="w-full bg-black/40 border border-amber-500/20 hover:border-amber-500/40 focus:border-amber-400/60 rounded-2xl resize-none p-4 text-sm sm:text-base text-zinc-200 placeholder:text-zinc-600 focus:outline-none transition-colors leading-relaxed"
+//                 style={{ fontFamily: "'Georgia', serif" }}
+//               />
+//               <div className="flex items-center justify-between">
+//                 <span
+//                   className={`text-xs font-mono ${
+//                     answer.length > 280 ? "text-rose-400" : "text-zinc-600"
+//                   }`}
+//                 >
+//                   {answer.length} / 300
+//                 </span>
+//                 <Button
+//                   variant="game"
+//                   onClick={handleSubmitAnswer}
+//                   disabled={submitting || !answer.trim()}
+//                 >
+//                   {submitting ? "Submitting…" : "Submit Answer"}
+//                 </Button>
+//               </div>
 //             </div>
 //           </div>
-//         </div>
-//       );
-//     return (
-//       <LobbyScreen
-//         charIdx={charIdx}
-//         lobbyText={lobbyText}
-//         onReady={handleReady}
-//       />
-//     );
+//         );
+
+//       case "LOBBY":
+//       default:
+//         return (
+//           <LobbyScreen
+//             charIdx={charIdx}
+//             lobbyText={LOBBY_TEXT}
+//             onReady={handleReady}
+//           />
+//         );
+//     }
 //   };
 
+//   /* ── Phase label map ─────────────────────────────────────────────────── */
 //   const phaseLabel: Record<LocalPhase, string> = {
 //     LOBBY: "Lobby",
 //     READY_WAITING: "Ready — awaiting question",
@@ -562,21 +711,31 @@
 //     ELIMINATED: "Eliminated",
 //   };
 
+//   const connected = isConnected();
+//   const activeCount = participants.filter((p) => !p.isEliminated).length;
+
+//   /* ── Render ──────────────────────────────────────────────────────────── */
 //   return (
 //     <div className="w-full max-w-7xl mx-auto px-4 flex flex-col gap-6">
+//       {/* ── Status bar ── */}
 //       <div className="flex items-center gap-3">
 //         <span
-//           className={`flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest ${isConnected() ? "text-emerald-400" : "text-rose-400"}`}
+//           className={`flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest transition-colors ${
+//             connected ? "text-emerald-400" : "text-rose-400"
+//           }`}
 //         >
-//           <Wifi size={12} />
-//           {isConnected() ? "Connected" : "Disconnected"}
+//           {connected ? <Wifi size={12} /> : <WifiOff size={12} />}
+//           {connected ? "Connected" : "Disconnected"}
 //         </span>
 //         <span className="text-white/10">·</span>
 //         <span className="text-white/30 text-xs font-mono uppercase tracking-widest">
 //           {phaseLabel[localPhase]}
 //         </span>
 //       </div>
-//       <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-black/90 via-zinc-950/80 to-rose-950/30 backdrop-blur-sm p-8 sm:p-14 flex flex-col items-center gap-8 min-h-[400px] justify-center relative overflow-hidden">
+
+//       {/* ── Main card ── */}
+//       <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-black/90 via-zinc-950/80 to-rose-950/30 backdrop-blur-sm p-8 sm:p-10 flex flex-col items-center gap-8 min-h-[420px] justify-center relative overflow-hidden">
+//         {/* Decorative background radials */}
 //         <div
 //           className="absolute inset-0 pointer-events-none opacity-20"
 //           style={{
@@ -584,6 +743,8 @@
 //               "radial-gradient(circle at 20% 20%, #d97706 0%, transparent 50%), radial-gradient(circle at 80% 80%, #9f1239 0%, transparent 50%)",
 //           }}
 //         />
+
+//         {/* Element flash animation (fullscreen overlay) */}
 //         {showElementAnimation && (
 //           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl">
 //             <ElementSpectator
@@ -591,22 +752,24 @@
 //             />
 //           </div>
 //         )}
+
 //         {renderCenter()}
 //       </div>
+
+//       {/* ── Player avatars ── */}
 //       <div className="text-center">
 //         <p className="text-white/20 text-[10px] uppercase tracking-widest mb-4 font-mono">
-//           Contestants — {participants.filter((p) => !p.isEliminated).length}{" "}
-//           active
+//           Contestants — {activeCount} active
 //         </p>
 //         <div className="flex items-center justify-center flex-wrap gap-3">
 //           {participants.map((p, i) => (
 //             <Avatar key={p.id} player={p} index={i} />
 //           ))}
 //         </div>
+
 //         {isElement && (
 //           <p className="mt-5 text-amber-400/80 text-sm font-medium tracking-wide flex items-center justify-center gap-2">
-//             <Sparkles size={14} />
-//             You are one of the Seven Elements
+//             <Sparkles size={14} /> You are one of the Seven Elements{" "}
 //             <Sparkles size={14} />
 //           </p>
 //         )}
@@ -630,6 +793,9 @@ import {
   Image as ImageIcon,
   Wifi,
   WifiOff,
+  MessageSquare,
+  Camera,
+  Video,
 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { useSocket } from "@/hooks/useSocket";
@@ -662,6 +828,86 @@ type LocalPhase =
   | "VIDEO"
   | "ELEMENT"
   | "ELIMINATED";
+
+/* ─── Round Title Banner ─────────────────────────────────────────────────── */
+function RoundTitle({
+  roundNumber,
+  roundName,
+  icon,
+  accentColor = "amber",
+}: {
+  roundNumber: string;
+  roundName: string;
+  icon: React.ReactNode;
+  accentColor?: "amber" | "rose" | "emerald" | "sky" | "violet";
+}) {
+  const colors: Record<
+    string,
+    { label: string; name: string; border: string; glow: string; icon: string }
+  > = {
+    amber: {
+      label: "text-amber-500/80",
+      name: "text-amber-300",
+      border: "border-amber-500/20",
+      glow: "from-amber-500/10",
+      icon: "text-amber-400",
+    },
+    sky: {
+      label: "text-sky-500/80",
+      name: "text-sky-300",
+      border: "border-sky-500/20",
+      glow: "from-sky-500/10",
+      icon: "text-sky-400",
+    },
+    violet: {
+      label: "text-violet-400/80",
+      name: "text-violet-200",
+      border: "border-violet-500/20",
+      glow: "from-violet-500/10",
+      icon: "text-violet-400",
+    },
+    rose: {
+      label: "text-rose-500/80",
+      name: "text-rose-300",
+      border: "border-rose-500/20",
+      glow: "from-rose-500/10",
+      icon: "text-rose-400",
+    },
+    emerald: {
+      label: "text-emerald-500/80",
+      name: "text-emerald-300",
+      border: "border-emerald-500/20",
+      glow: "from-emerald-500/10",
+      icon: "text-emerald-400",
+    },
+  };
+
+  const c = colors[accentColor];
+
+  return (
+    <div
+      className={`w-full flex items-center gap-4 pb-3  mb-2 border-b ${c.border}`}
+    >
+      <div
+        className={`flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${c.glow} to-transparent border ${c.border} ${c.icon} shrink-0`}
+      >
+        {icon}
+      </div>
+      <div className="flex flex-col leading-tight">
+        <span
+          className={`text-[13px]  font-mono uppercase tracking-[5px] ${c.label}`}
+        >
+          {roundNumber}
+        </span>
+        <span
+          className={`text-xl sm:text-2xl font-black uppercase tracking-widest ${c.name}`}
+        >
+          {roundName}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 /* ─── Animated dot row ───────────────────────────────────────────────────── */
 function PulseDots({ count = 3 }: { count?: number }) {
@@ -878,34 +1124,58 @@ function LobbyScreen({
 /* ─── Waiting screens ────────────────────────────────────────────────────── */
 function ReadyWaitingScreen() {
   return (
-    <WaitingCard
-      icon={<Check className="w-9 h-9" />}
-      title="Ready!"
-      subtitle="Waiting for the host to send the first question…"
-      accentColor="emerald"
-    />
+    <div className="w-full flex flex-col items-center gap-6">
+      <RoundTitle
+        roundNumber="Round 1"
+        roundName="Questions"
+        icon={<MessageSquare className="w-5 h-5" />}
+        accentColor="emerald"
+      />
+      <WaitingCard
+        icon={<Check className="w-9 h-9" />}
+        title="Ready!"
+        subtitle="Waiting for the host to send the first question…"
+        accentColor="emerald"
+      />
+    </div>
   );
 }
 
 function AnswerWaitingScreen() {
   return (
-    <WaitingCard
-      icon={<ImageIcon className="w-9 h-9" />}
-      title="Answer Submitted"
-      subtitle="Preparing the image upload round…"
-      accentColor="amber"
-    />
+    <div className="w-full flex flex-col items-center gap-6">
+      <RoundTitle
+        roundNumber="Round 1"
+        roundName="Questions"
+        icon={<MessageSquare className="w-5 h-5" />}
+        accentColor="amber"
+      />
+      <WaitingCard
+        icon={<ImageIcon className="w-9 h-9" />}
+        title="Answer Submitted"
+        subtitle="Preparing the image upload round…"
+        accentColor="amber"
+      />
+    </div>
   );
 }
 
 function ImageWaitingScreen() {
   return (
-    <WaitingCard
-      icon={<Phone className="w-9 h-9" />}
-      title="Image Received"
-      subtitle="Waiting for the host to call you…"
-      accentColor="sky"
-    />
+    <div className="w-full flex flex-col items-center gap-6">
+      <RoundTitle
+        roundNumber="Round 2"
+        roundName="Pictures"
+        icon={<Camera className="w-5 h-5" />}
+        accentColor="sky"
+      />
+      <WaitingCard
+        icon={<Phone className="w-9 h-9" />}
+        title="Image Received"
+        subtitle="Waiting for the host to call you…"
+        accentColor="sky"
+      />
+    </div>
   );
 }
 
@@ -977,7 +1247,6 @@ function QuesationShowAndAns() {
   const isEliminated = currentPlayer?.isEliminated === true;
 
   /* ── Refs ────────────────────────────────────────────────────────────── */
-  // Keep a ref so socket callbacks always see the latest eliminated status
   const isEliminatedRef = useRef(false);
   useEffect(() => {
     isEliminatedRef.current = isEliminated;
@@ -1012,22 +1281,16 @@ function QuesationShowAndAns() {
     [dispatch, router],
   );
 
-  /**
-   * Extract URL from API response.
-   * Your server returns: { success: true, message: "...", data: "https://..." }
-   * `data` is the URL string directly — not an object.
-   */
   const extractImageUrl = (result: any): string => {
     if (typeof result?.data === "string" && result.data.startsWith("http")) {
       return result.data;
     }
-    // Fallback shapes for other possible API responses
     return (
       result?.url ?? result?.imageUrl ?? result?.data?.url ?? result?.path ?? ""
     );
   };
 
-  /* ── Image submit: upload then socket ────────────────────────────────── */
+  /* ── Image submit ────────────────────────────────────────────────────── */
   const handleImageSubmit = useCallback(
     async (blob: Blob) => {
       try {
@@ -1071,13 +1334,11 @@ function QuesationShowAndAns() {
         return;
       }
 
-      // Only process non-update events if not eliminated
       if (isEliminatedRef.current && payload.type !== "PLAYERS_UPDATE") return;
 
       if (payload.type === "PLAYERS_UPDATE" && Array.isArray(payload.payload)) {
         const newParticipants = payload.payload as ServerPlayer[];
 
-        // Check if current user just became an Element
         const isNowElement = newParticipants.some(
           (p) => p.id === currentUser?.id && p.isElement === true,
         );
@@ -1088,7 +1349,6 @@ function QuesationShowAndAns() {
         }
         setPreviousElementStatus(isNowElement);
 
-        // Check if current user is now eliminated
         const nowEliminated = newParticipants.some(
           (p) => p.id === currentUser?.id && p.isEliminated === true,
         );
@@ -1147,7 +1407,6 @@ function QuesationShowAndAns() {
   });
 
   /* ── Effects ─────────────────────────────────────────────────────────── */
-  // Lobby typewriter animation
   useEffect(() => {
     if (localPhase !== "LOBBY") return;
     if (charIdx >= LOBBY_TEXT.length) return;
@@ -1155,7 +1414,6 @@ function QuesationShowAndAns() {
     return () => clearTimeout(t);
   }, [charIdx, localPhase]);
 
-  // Sync elimination / element status from redux
   useEffect(() => {
     if (isEliminated) {
       isEliminatedRef.current = true;
@@ -1202,7 +1460,7 @@ function QuesationShowAndAns() {
     );
   };
 
-  /* ── Derive SnapEditor props from upload mutation state ──────────────── */
+  /* ── Derive SnapEditor props ─────────────────────────────────────────── */
   const snapUploadErrorMsg: string | null = isImageUploadError
     ? ((imageUploadErrorData as any)?.data?.message ??
       (imageUploadErrorData as any)?.message ??
@@ -1228,7 +1486,14 @@ function QuesationShowAndAns() {
 
       case "VIDEO":
         return (
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-6">
+            {/* ── Round 3 — The Grand Finale title ── */}
+            <RoundTitle
+              roundNumber="Round 3"
+              roundName="The Grand Finale"
+              icon={<Video className="w-5 h-5" />}
+              accentColor="violet"
+            />
             <VideoCallRound
               sendEvent={sendEvent}
               incomingHostId={incomingHostId}
@@ -1241,7 +1506,14 @@ function QuesationShowAndAns() {
 
       case "IMAGE_UPLOAD":
         return (
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-6">
+            {/* ── Round 2 — Pictures title ── */}
+            <RoundTitle
+              roundNumber="Round 2"
+              roundName="Pictures"
+              icon={<Camera className="w-5 h-5" />}
+              accentColor="sky"
+            />
             <SnapEditor
               onSubmit={handleImageSubmit}
               isUploading={isImageUploading}
@@ -1264,6 +1536,14 @@ function QuesationShowAndAns() {
         if (!currentQuestion) return null;
         return (
           <div className="w-full flex flex-col items-center gap-6 z-10">
+            {/* ── Round 1 — Questions title ── */}
+            <RoundTitle
+              roundNumber="Round 1"
+              roundName="Questions"
+              icon={<MessageSquare className="w-5 h-5" />}
+              accentColor="amber"
+            />
+
             {/* Question card */}
             <div className="w-full max-w-2xl rounded-2xl border border-amber-500/20 bg-black/30 p-6">
               <p className="text-[10px] text-amber-500/50 uppercase tracking-[5px] font-mono mb-3">
@@ -1320,11 +1600,11 @@ function QuesationShowAndAns() {
   const phaseLabel: Record<LocalPhase, string> = {
     LOBBY: "Lobby",
     READY_WAITING: "Ready — awaiting question",
-    QUESTION: "Q&A Round",
+    QUESTION: "Round 1 · Questions",
     ANSWER_WAITING: "Answer sent — awaiting image round",
-    IMAGE_UPLOAD: "Image Upload",
+    IMAGE_UPLOAD: "Round 2 · Pictures",
     IMAGE_WAITING: "Image sent — awaiting call",
-    VIDEO: "Video Round",
+    VIDEO: "Round 3 · The Grand Finale",
     ELEMENT: "You are an Element",
     ELIMINATED: "Eliminated",
   };
@@ -1362,7 +1642,7 @@ function QuesationShowAndAns() {
           }}
         />
 
-        {/* Element flash animation (fullscreen overlay) */}
+        {/* Element flash animation */}
         {showElementAnimation && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl">
             <ElementSpectator
