@@ -535,7 +535,7 @@ import { useSocket } from "@/hooks/useSocket";
 import { clearPlayers } from "@/redux/features/sidePanel/participantsSlice";
 import { resetGameOver } from "@/redux/features/winner/Gameoverslice";
 
-const DEFAULT_VIDEO_SRC = "/videos/intro.mp4";
+const DEFAULT_VIDEO_SRC = "/videos/IB_Round_1.mp4";
 
 type Role = "bachelor" | "contestant";
 
